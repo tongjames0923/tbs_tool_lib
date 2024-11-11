@@ -16,39 +16,57 @@
 
 #define LOG_LEVEL L_TRACE
 
-enum LogLevel {
-  TRACE = 5, DEBUG = 4, INFO = 3, WARN = 2, ERROR = 1
+enum LogLevel
+{
+    TRACE = 5,
+    DEBUG = 4,
+    INFO = 3,
+    WARN = 2,
+    ERROR = 1
 };
 
 /**
  * 日志输出的格式化宏
  */
 #define LOG_FORMAT(...) std::format(__VA_ARGS__)
-
-class BaseLogger {
+// 定义一个基础日志类，用于派生出具体的日志记录器
+class BaseLogger
+{
 public:
-  explicit BaseLogger(const char *name = "undefined") : _name(name) {
-  }
+    // 构造函数，允许在创建日志对象时指定日志记录器的名称
+    // 参数 name: 日志记录器的名称，默认为"undefined"
+    explicit BaseLogger(const char *name = "undefined") : _name(name)
+    {
+    }
 
-  [[nodiscard]] const tbs::str_type &getLoggerName() const {
-	return _name;
-  }
+    // 获取日志记录器的名称
+    // 返回值: 日志记录器的名称
+    const tbs::str_type &getLoggerName() const
+    {
+        return _name;
+    }
 
-  virtual void log(const LogLevel &level, const char *str) const = 0;
-  virtual ~BaseLogger() = default;
+    // 纯虚函数，用于记录日志，具体的实现将在派生类中提供
+    // 参数 level: 日志的级别
+    // 参数 str: 要记录的日志信息
+    virtual void log(const LogLevel &level, const char *str) const = 0;
+
+    // 虚析构函数，确保派生类对象能够被正确地销毁
+    virtual ~BaseLogger() = default;
 
 private:
-  tbs::str_type _name;
+    // 存储日志记录器的名称
+    tbs::str_type _name;
 };
 
 #if LOG_LEVEL >= L_TRACE
-#define TRACE_LOG(...)                                                                                                 \
-    {                                                                                                                  \
-                                                                                                                       \
-        for (auto& _inused_logger_ : std::initializer_list<BaseLogger*>{INUSE_LOGGERS})                                \
-        {                                                                                                              \
-            _inused_logger_->log(LogLevel::TRACE, LOG_FORMAT(__VA_ARGS__).c_str());                                   \
-        }                                                                                                              \
+#define TRACE_LOG(...)                                                                   \
+    {                                                                                    \
+                                                                                         \
+        for (auto &_inused_logger_ : std::initializer_list<BaseLogger *>{INUSE_LOGGERS}) \
+        {                                                                                \
+            _inused_logger_->log(LogLevel::TRACE, LOG_FORMAT(__VA_ARGS__).c_str());      \
+        }                                                                                \
     }
 
 #else
@@ -56,13 +74,13 @@ private:
 #endif
 
 #if LOG_LEVEL >= L_DEBUG
-#define DEBUG_LOG(...)                                                                                                 \
-    {                                                                                                                  \
-                                                                                                                       \
-        for (auto& _inused_logger_ : std::initializer_list<BaseLogger*>{INUSE_LOGGERS})                                \
-        {                                                                                                              \
-            _inused_logger_->log(LogLevel::DEBUG, LOG_FORMAT(__VA_ARGS__).c_str());                                   \
-        }                                                                                                              \
+#define DEBUG_LOG(...)                                                                   \
+    {                                                                                    \
+                                                                                         \
+        for (auto &_inused_logger_ : std::initializer_list<BaseLogger *>{INUSE_LOGGERS}) \
+        {                                                                                \
+            _inused_logger_->log(LogLevel::DEBUG, LOG_FORMAT(__VA_ARGS__).c_str());      \
+        }                                                                                \
     }
 
 #else
@@ -70,13 +88,13 @@ private:
 #endif
 
 #if LOG_LEVEL >= L_INFO
-#define INFO_LOG(...)                                                                                                  \
-    {                                                                                                                  \
-                                                                                                                       \
-        for (auto& _inused_logger_ : std::initializer_list<BaseLogger*>{INUSE_LOGGERS})                                \
-        {                                                                                                              \
-            _inused_logger_->log(LogLevel::INFO, LOG_FORMAT(__VA_ARGS__).c_str());                                    \
-        }                                                                                                              \
+#define INFO_LOG(...)                                                                    \
+    {                                                                                    \
+                                                                                         \
+        for (auto &_inused_logger_ : std::initializer_list<BaseLogger *>{INUSE_LOGGERS}) \
+        {                                                                                \
+            _inused_logger_->log(LogLevel::INFO, LOG_FORMAT(__VA_ARGS__).c_str());       \
+        }                                                                                \
     }
 
 #else
@@ -84,13 +102,13 @@ private:
 #endif
 
 #if LOG_LEVEL >= L_WARN
-#define WARN_LOG(...)                                                                                                  \
-    {                                                                                                                  \
-                                                                                                                       \
-        for (auto& _inused_logger_ : std::initializer_list<BaseLogger*>{INUSE_LOGGERS})                                \
-        {                                                                                                              \
-            _inused_logger_->log(LogLevel::WARN, LOG_FORMAT(__VA_ARGS__).c_str());                                    \
-        }                                                                                                              \
+#define WARN_LOG(...)                                                                    \
+    {                                                                                    \
+                                                                                         \
+        for (auto &_inused_logger_ : std::initializer_list<BaseLogger *>{INUSE_LOGGERS}) \
+        {                                                                                \
+            _inused_logger_->log(LogLevel::WARN, LOG_FORMAT(__VA_ARGS__).c_str());       \
+        }                                                                                \
     }
 
 #else
@@ -98,17 +116,17 @@ private:
 #endif
 
 #if LOG_LEVEL >= L_ERROR
-#define ERROR_LOG(...)                                                                                                 \
-    {                                                                                                                  \
-                                                                                                                       \
-        for (auto& _inused_logger_ : std::initializer_list<BaseLogger*>{INUSE_LOGGERS})                                \
-        {                                                                                                              \
-            _inused_logger_->log(LogLevel::ERROR, LOG_FORMAT(__VA_ARGS__).c_str());                                   \
-        }                                                                                                              \
+#define ERROR_LOG(...)                                                                   \
+    {                                                                                    \
+                                                                                         \
+        for (auto &_inused_logger_ : std::initializer_list<BaseLogger *>{INUSE_LOGGERS}) \
+        {                                                                                \
+            _inused_logger_->log(LogLevel::ERROR, LOG_FORMAT(__VA_ARGS__).c_str());      \
+        }                                                                                \
     }
 
 #else
 #define ERROR_LOG(...)
 #endif
 
-#endif// TBS_CPP_LOG_HPP
+#endif // TBS_CPP_LOG_HPP
