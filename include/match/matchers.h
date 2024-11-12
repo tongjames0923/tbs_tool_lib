@@ -13,6 +13,29 @@
 template<typename T, typename F>
 using EqualableMatcher = Matcher<T, EqualMatchExpression, F>;
 
+// 定义一个类型别名模板NotEqualMatcher，用于匹配不相等的值
+// T表示待比较的类型，F表示比较函数的类型
+template<typename T, typename F>
+using NotEqualMatcher = Matcher<T, NotEqualMatchExpression, F>;
+
+// 定义一个模板别名GreaterThanMatcher，用于匹配大于操作
+template<typename T, typename F>
+using GreaterThanMatcher = Matcher<T, GreaterThanMatchExpression, F>;
+
+// 定义一个模板别名GreaterThanOrEqualMatcher，用于匹配大于等于操作
+template<typename T, typename F>
+using GreaterThanOrEqualMatcher = Matcher<T, GreaterThanOrEqualMatchExpression, F>;
+
+// 定义一个模板别名LessThanMatcher，用于匹配小于操作
+template<typename T, typename F>
+using LessThanMatcher = Matcher<T, LessThanMatchExpression, F>;
+
+// 定义一个模板别名LessThanOrEqualMatcher，用于匹配小于等于操作
+template<typename T, typename F>
+using LessThanOrEqualMatcher = Matcher<T, LessThanOrEqualMatchExpression, F>;
+
+
+
 // 定义一个类型别名模板AnyMatcher，用于匹配任何值
 // F表示匹配函数的类型
 template<typename F>
