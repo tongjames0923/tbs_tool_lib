@@ -4,22 +4,32 @@
 #include <time_utils.hpp>
 #include <iostream>
 #include <log/loggers/BuiltInLogger.h>
+
 using namespace time_utils;
 using namespace std;
 using namespace BuiltInLoggers;
 
 ConsoleLogger *consoleLogger = new ConsoleLogger("console");
-#include <log/log.hpp>
 
 
+LoggerWrapper<LogLevel::INFO> logger{consoleLogger};
 
 
-#define INUSE_LOGGERS consoleLogger
-int main(int argc, char *argv[])
-{
-	cout << utils_now() << endl;
-	cout << LOG_LEVEL << endl;
-	INFO_LOG("this is info log");
-	DEBUG_LOG("this is debug log");
-	return 0;
+LoggerWrapper<LogLevel::TRACE> tlogger{consoleLogger};
+
+
+#define LOGGER_WRAPPER tlogger
+
+#include <log/log_macro.h>
+
+int main(int argc, char *argv[]) {
+  cout << utils_now() << endl;
+
+  LOG_INFO("hello world{}", 1);
+  LOG_DEBUG("hello world{}", 2);
+  LOG_TRACE("hello world{}", 3);
+
+  LOG_ERROR("hello world{}", 4);
+  LOG_WARN("hello world{}", 5);
+  return 0;
 }

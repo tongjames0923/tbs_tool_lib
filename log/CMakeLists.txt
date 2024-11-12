@@ -53,7 +53,8 @@ IF (CMAKE_LIB_BUILD_STATIC)
 
 ELSE ()
     MESSAGE(STATUS "dynamic lib build")
-    ADD_LIBRARY(tbs_log SHARED ${HEADERS} ${HEADER_INLS} ${SOURCES})
+    ADD_LIBRARY(tbs_log SHARED ${HEADERS} ${HEADER_INLS} ${SOURCES}
+            include/log/log_macro.h)
     target_include_directories(tbs_log PUBLIC ${HEADER_PATH} ${PROJECT_HEAD} ${INLS_SOURCE})
 ENDIF ()
 # 安装库文件
