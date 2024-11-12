@@ -4,7 +4,7 @@
 #include <time_utils.hpp>
 #include <iostream>
 #include <log/loggers/BuiltInLogger.h>
-#include <match/matchers.h>
+#include <match/match_macro.h>
 
 using namespace time_utils;
 using namespace std;
@@ -24,45 +24,17 @@ LoggerWrapper<LogLevel::TRACE> tlogger{consoleLogger};
 #include <log/log_macro.h>
 
 
-template<typename T, typename F>
-auto match(T v, F f) {
-  if (f.test(v)) {
-	return f(v);
-  }
-  return v;
-}
-
-template<typename T, typename F, typename ...ARGS>
-auto match(T v, F f, ARGS... args) {
-  if (f.test(v)) {
-	return f(v);
-  }
-  return match(v, args...);
-}
-
-
-template<typename T, typename ...ARGS>
-auto match(T v, ARGS... args) {
-  return match(v, args...);
-}
-
 int main(int argc, char *argv[]) {
-  int target = 88;
-  auto any = make_any_matcher([](auto t, auto v) -> auto {
-	LOG_INFO("hello world");
-	return 0;
-  });
-  auto equal = make_equal_matcher(32, [](int n, int t) -> int {
-	LOG_INFO("equal able");
-	return n * 10;
-  });
-
-  auto functional = make_functional_matcher([](int n, auto i) {
-	LOG_INFO("functional able");
-	return n * 100;
-  }, [&]() {
-	return target % 2 == 0;
-  });
+  int target = 4;
+  auto any =
+	  ANY_MATCH(
+		  LOG_INFO("any mathched {} ", _target_);
+		  return _target_ + 1;
+	  );
+  auto equal = EQUAL_MATCH(32, LOG_INFO("equal able");
+	  return _target_ * 10;);
+  auto functional = FUNCTION_MATCH(target % 2 == 0, LOG_INFO("functional able");
+	  return _target_ * 100;);
   auto k = match(target, functional, equal, any);
   cout << k << endl;
   return 0;

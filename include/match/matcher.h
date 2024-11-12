@@ -8,7 +8,6 @@
 #include <defs.h>
 #include <type_check.h>
 
-/c++
 /**
  * @brief Matcher类模板
  *
