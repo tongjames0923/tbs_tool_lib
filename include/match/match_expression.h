@@ -6,7 +6,7 @@
 #define TBS_TOOL_LIB_INCLUDE_MATCH_MATCH_EXPRESSION_H
 
 #include <type_check.h>
-
+#include <match/expressions/RelationExpressions.h>
 
 /**
  * @brief 任意匹配表达式类
@@ -29,25 +29,6 @@ public:
   bool test(T target, O other) CONST;
 };
 
-/**
- * @brief 相等匹配表达式类
- *
- * 该类提供了一个模板方法test，用于测试两个参数是否相等。
- */
-class EqualMatchExpression {
-public:
-  /**
-   * @brief 测试两个参数是否相等
-   *
-   * @tparam T 目标参数的类型
-   * @tparam O 其他参数的类型
-   * @param target 目标参数
-   * @param other 其他参数
-   * @return true 如果两个参数相等，否则返回false
-   */
-  template<typename T, typename O>
-  bool test(T target, O other) CONST;
-};
 
 /**
  * @brief 函数式匹配表达式类
@@ -100,9 +81,5 @@ bool AnyMatchExpression::test(T target, O other) CONST {
   return true;
 }
 
-template<typename T, typename O>
-bool EqualMatchExpression::test(T target, O other) CONST {
-  return target == other;
-}
 
 #endif //TBS_TOOL_LIB_INCLUDE_MATCH_MATCH_EXPRESSION_H

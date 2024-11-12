@@ -102,7 +102,7 @@ public:
    */
   template<typename T>
   bool test(T t) const {
-	return _equals.test(_value, t);
+	return _equals.test(t, _value);
   }
 
   /**
@@ -116,7 +116,7 @@ public:
    */
   template<typename T>
   auto operator()(T t) const {
-	return _f(t,_value);
+	return _f(t, _value);
   }
 
 };

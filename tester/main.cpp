@@ -29,10 +29,9 @@ int main(int argc, char *argv[]) {
   auto any =
 	  ANY_MATCH(
 		  LOG_INFO("any mathched {} ", _target_);
-
 	  );
   auto equal = EQUAL_MATCH(32, LOG_INFO("equal able"););
   auto functional = FUNCTION_MATCH(target % 2 == 0, LOG_INFO("functional able"););
-  matchWithoutReturn(target, functional, equal, any);
+  matchWithoutReturn(target, equal, functional, any);
   return 0;
 }
