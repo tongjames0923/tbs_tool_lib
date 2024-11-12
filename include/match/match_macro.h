@@ -33,6 +33,15 @@ auto match(T v, F f) {
   return v;
 }
 
+// 定义一个模板函数，用于将一个值与一个匹配器进行匹配
+template<typename T, typename F>
+void matchWithoutReturn(T v, F f) {
+  // 如果匹配器测试通过，则调用匹配器并返回结果
+  if (f.test(v)) {
+	f(v);
+  }
+}
+
 // 定义一个模板函数，用于将一个值与多个匹配器进行匹配
 template<typename T, typename F, typename ...ARGS>
 auto match(T v, F f, ARGS... args) {
@@ -45,10 +54,29 @@ auto match(T v, F f, ARGS... args) {
 }
 
 // 定义一个模板函数，用于将一个值与多个匹配器进行匹配
+template<typename T, typename F, typename ...ARGS>
+void matchWithoutReturn(T v, F f, ARGS... args) {
+  // 如果匹配器测试通过，则调用匹配器并返回结果
+  if (f.test(v)) {
+	f(v);
+	return;
+  }
+  // 否则，继续尝试与剩余的匹配器进行匹配
+  matchWithoutReturn(v, args...);
+}
+
+// 定义一个模板函数，用于将一个值与多个匹配器进行匹配
 template<typename T, typename ...ARGS>
 auto match(T v, ARGS... args) {
   // 调用上述函数，尝试与所有匹配器进行匹配
   return match(v, args...);
+}
+
+// 定义一个模板函数，用于将一个值与多个匹配器进行匹配
+template<typename T, typename ...ARGS>
+void matchWithoutReturn(T v, ARGS... args) {
+  // 调用上述函数，尝试与所有匹配器进行匹配
+  matchWithoutReturn(v, args...);
 }
 
 

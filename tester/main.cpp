@@ -29,13 +29,10 @@ int main(int argc, char *argv[]) {
   auto any =
 	  ANY_MATCH(
 		  LOG_INFO("any mathched {} ", _target_);
-		  return _target_ + 1;
+
 	  );
-  auto equal = EQUAL_MATCH(32, LOG_INFO("equal able");
-	  return _target_ * 10;);
-  auto functional = FUNCTION_MATCH(target % 2 == 0, LOG_INFO("functional able");
-	  return _target_ * 100;);
-  auto k = match(target, functional, equal, any);
-  cout << k << endl;
+  auto equal = EQUAL_MATCH(32, LOG_INFO("equal able"););
+  auto functional = FUNCTION_MATCH(target % 2 == 0, LOG_INFO("functional able"););
+  matchWithoutReturn(target, functional, equal, any);
   return 0;
 }
