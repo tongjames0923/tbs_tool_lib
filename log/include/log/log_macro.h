@@ -1,0 +1,8 @@
+//
+// Created by abstergo on 24-11-12.
+//
+
+#ifndef TBS_TOOL_LIB_LOG_INCLUDE_LOG_LOG_MACRO_H
+#define TBS_TOOL_LIB_LOG_INCLUDE_LOG_LOG_MACRO_H
+
+#endif //TBS_TOOL_LIB_LOG_INCLUDE_LOG_LOG_MACRO_H
