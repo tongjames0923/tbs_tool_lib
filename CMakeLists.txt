@@ -54,7 +54,6 @@ IF (CMAKE_LIB_BUILD_STATIC)
     target_include_directories(tbs_tool_lib PUBLIC ${HEADER_PATH} ${PROJECT_HEAD} ${INLS_SOURCE})
 ELSE ()
     MESSAGE(STATUS "dynamic lib build")
-    ADD_LIBRARY(tbs_tool_lib SHARED ${HEADERS} ${HEADER_INLS} ${SOURCES}
-            tester/main.cpp)
+    ADD_LIBRARY(tbs_tool_lib SHARED ${HEADERS} ${HEADER_INLS} ${SOURCES})
     target_include_directories(tbs_tool_lib PUBLIC ${HEADER_PATH} ${PROJECT_HEAD} ${INLS_SOURCE})
 ENDIF ()
