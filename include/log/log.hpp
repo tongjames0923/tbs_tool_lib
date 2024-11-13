@@ -69,7 +69,7 @@ private:
 public:
 
   template<class  ...Args>
-  LoggerWrapper(Args &&...args) {
+  explicit LoggerWrapper(Args &&...args) {
 	// 使用模板递归将参数添加到 _loggers 中
 	addLoggers(std::forward<Args>(args)...);
   }

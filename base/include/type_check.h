@@ -6,6 +6,7 @@
 #define TBS_CPP_TYPE_CHECK_H
 
 #include <type_traits>
+#include <string>
 
 /**
  * @brief 是否包含针对指定类型的等价运算符 ，支持U.operator==(V)的类型
