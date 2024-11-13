@@ -23,15 +23,30 @@ LoggerWrapper<LogLevel::TRACE> tlogger{consoleLogger};
 
 #include <log/log_macro.h>
 
+#include <concurrency/LockAdapter.h>
+
+
+using namespace tbs::concurrency;
+
+#include <concurrency/lock_operators/operators.h>
+#include <latch>
+
+mutex_lock_adapter l;
+
+#define N 200
 
 int main(int argc, char *argv[]) {
-  int target = 4;
-  auto any =
-	  ANY_MATCH(
-		  LOG_INFO("any mathched {} ", _target_);
-	  );
-  auto equal = EQUAL_MATCH(32, LOG_INFO("equal able"););
-  auto functional = FUNCTION_MATCH(target % 2 == 0, LOG_INFO("functional able"););
-  matchWithoutReturn(target, equal, functional, any);
+  int k = 0;
+  std::latch lat(N);
+  for (int i = 0; i < N; i++) {
+	thread r([&]() {
+	  l.lock();
+	  std::cout << "thread " << k++ << std::endl;
+	  l.unlock();
+	  lat.count_down();
+	});
+	r.detach();
+  }
+  lat.wait();
   return 0;
 }

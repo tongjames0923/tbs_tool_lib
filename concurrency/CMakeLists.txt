@@ -1,5 +1,5 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.27.8)
-PROJECT(tbs_tool_lib VERSION 0.1.0 LANGUAGES C CXX)
+PROJECT(tbs_tool_concurrency VERSION 0.1.0 LANGUAGES C CXX)
 
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_CXX_STANDARD 20)
@@ -7,8 +7,9 @@ SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/runtime)
 SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
 SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/runtime)
 SET(SOURCE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/impls)
-SET(PROJECT_HEAD ${CMAKE_CURRENT_SOURCE_DIR}/include)
+SET(PROJECT_HEAD ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/include)
 SET(INLS_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/include/inls)
+
 
 OPTION(CMAKE_LIB_BUILD_STATIC "库文件是否为静态，否为动态库" ON)
 
@@ -25,14 +26,6 @@ ELSEIF (APPLE)
     SET(CMAKE_OSX_SYSROOT /Library/Developer/CommandLineTools/SDKs/MacOSX12.1.sdk)
 ENDIF ()
 
-add_subdirectory(base)
-add_subdirectory(log)
-
-
-add_subdirectory(concurrency)
-
-
-add_subdirectory(tester)
 LINK_DIRECTORIES(BEFORE ${LIB_PATH})
 MESSAGE(STATUS "searching for sources...")
 FILE(GLOB_RECURSE SOURCES ${SOURCE_PATH}/**.cpp ${SOURCE_PATH}/**.c)
@@ -52,13 +45,18 @@ FOREACH (ITEM IN LISTS HEADER_INLS)
     MESSAGE(STATUS "head inls file: ${ITEM}")
 ENDFOREACH ()
 
-
 IF (CMAKE_LIB_BUILD_STATIC)
     MESSAGE(STATUS "static lib build")
-    ADD_LIBRARY(tbs_tool_lib STATIC ${HEADERS} ${HEADER_INLS} ${SOURCES})
-    target_include_directories(tbs_tool_lib PUBLIC ${HEADER_PATH} ${PROJECT_HEAD} ${INLS_SOURCE})
+    ADD_LIBRARY(tbs_tool_concurrency STATIC ${HEADERS} ${HEADER_INLS} ${SOURCES})
+    target_include_directories(tbs_tool_concurrency PUBLIC ${HEADER_PATH} ${PROJECT_HEAD} ${INLS_SOURCE})
+
 ELSE ()
     MESSAGE(STATUS "dynamic lib build")
-    ADD_LIBRARY(tbs_tool_lib SHARED ${HEADERS} ${HEADER_INLS} ${SOURCES})
-    target_include_directories(tbs_tool_lib PUBLIC ${HEADER_PATH} ${PROJECT_HEAD} ${INLS_SOURCE})
+    ADD_LIBRARY(tbs_tool_concurrency SHARED ${HEADERS} ${HEADER_INLS} ${SOURCES})
+    target_include_directories(tbs_tool_concurrency PUBLIC ${HEADER_PATH} ${PROJECT_HEAD} ${INLS_SOURCE})
 ENDIF ()
+# 安装库文件
+install(TARGETS tbs_tool_concurrency DESTINATION ${CMAKE_SOURCE_DIR}/lib)
+
+# 安装头文件
+install(DIRECTORY include/ DESTINATION ${CMAKE_SOURCE_DIR}/include)
