@@ -4,7 +4,7 @@
 
 #ifndef TBS_TOOL_LIB_CONCURRENCY_INCLUDE_CONCURRENCY_LOCKADAPTER_H
 #define TBS_TOOL_LIB_CONCURRENCY_INCLUDE_CONCURRENCY_LOCKADAPTER_H
-
+#include <guard.h>
 #include <defs.h>
 #include <unordered_map>
 
@@ -173,6 +173,24 @@ public:
 	return m_op.heldByCurrentThread(m_lock);
   }
 };
+
+namespace guard {
+
+namespace functions {
+template<typename T>
+static inline void lock_on_init(T &t) {
+  t.lock();
+}
+
+template<typename T>
+static inline void unlock_on_destroy(T &t) {
+  t.unlock();
+}
+}
+template<typename T>
+using auto_op_lock_guard = Guard<T, functions::lock_on_init<T>, functions::unlock_on_destroy<T>>;
+}
+
 
 }
 

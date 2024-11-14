@@ -49,33 +49,27 @@ TimedMutexLockAdapter l;
 atomic_bool flag = false;
 
 int main(int argc, char *argv[]) {
-  A *ptr = new A();
-  LOG_INFO("ptr: {}", (long long)ptr);
-  {
-	ptr_guard<A *> g(ptr);
 
+  LOG_INFO("start");
+  thread t1([&]() {
+	guard::auto_op_lock_guard<decltype(l)> g(l);
+	flag = true;
+	this_thread::sleep_for(chrono::milliseconds(500));
+	LOG_INFO("will release");
+  });
+  t1.detach();
+  while (!flag) {
+	this_thread::yield();
   }
-  LOG_INFO("ptr: {}", (long long)ptr);
+  bool f = l.try_lock(1000);
 
-//  thread t1([&]() {
-//	l.lock();
-//	flag = true;
-//	this_thread::sleep_for(chrono::milliseconds(500));
-//	l.unlock();
-//  });
-//  t1.detach();
-//  while (!flag) {
-//	this_thread::yield();
-//  }
-//  bool f = l.try_lock(1000);
-//
-//  LOG_INFO("try_lock result: {}", f ? "true" : "false");
-//  if (f) {
-//	l.unlock();
-//  }
-//  l.lock();
-//  LOG_INFO("locked");
-//  l.unlock();
+  LOG_INFO("try_lock result: {}", f ? "true" : "false");
+  if (f) {
+	l.unlock();
+  }
+  l.lock();
+  LOG_INFO("locked");
+  l.unlock();
 
   return 0;
 }
