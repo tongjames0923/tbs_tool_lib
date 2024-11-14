@@ -9,11 +9,11 @@
 #include <concurrency/LockAdapter.h>
 
 
-using MutexLockAdapter = tbs::concurrency::LockAdapter<std::mutex, MutexLockOpeartor>;
-using RecursiveLockAdapter = tbs::concurrency::LockAdapter<std::recursive_mutex, RecursiveLockOperator>;
+using MutexLockAdapter = tbs::concurrency::UniqueLockAdapter<std::mutex, MutexLockOpeartor>;
+using RecursiveLockAdapter = tbs::concurrency::UniqueLockAdapter<std::recursive_mutex, RecursiveLockOperator>;
 
-using TimedMutexLockAdapter = tbs::concurrency::LockAdapter<std::timed_mutex, TimedMutexLockOperator>;
-using RecursiveTimedMutexLockAdapter = tbs::concurrency::LockAdapter<std::recursive_timed_mutex,
-																	 RecursiveTimedLockOperator>;
+using TimedMutexLockAdapter = tbs::concurrency::UniqueLockAdapter<std::timed_mutex, TimedMutexLockOperator>;
+using RecursiveTimedMutexLockAdapter = tbs::concurrency::UniqueLockAdapter<std::recursive_timed_mutex,
+																		   RecursiveTimedLockOperator>;
 
 #endif //TBS_TOOL_LIB_CONCURRENCY_INCLUDE_CONCURRENCY_ADAPTERS_H
