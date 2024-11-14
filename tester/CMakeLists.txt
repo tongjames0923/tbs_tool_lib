@@ -4,17 +4,17 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_CXX_STANDARD 20)
 
 
-SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/runtime)
+SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/runtime)
 
 
 IF (WIN32)
     MESSAGE(STATUS "WINDOWS PLATFORM")
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
-    SET(HEADER_PATH ${CMAKE_SOURCE_DIR}/include)
+    SET(HEADER_PATH ${CMAKE_SOURCE_DIR}/bin/include)
 ELSEIF (APPLE)
     MESSAGE(STATUS "APPLE PLATFORM")
-    SET(HEADER_PATH ${CMAKE_SOURCE_DIR}/include /opt/homebrew/include /opt/homebrew/opt/llvm@17/include)
-    SET(LIB_PATH ${CMAKE_SOURCE_DIR}/lib /opt/homebrew/lib /opt/homebrew/opt/llvm@17/lib/c++)
+    SET(HEADER_PATH ${CMAKE_SOURCE_DIR}/bin/include /opt/homebrew/include /opt/homebrew/opt/llvm@17/include)
+    SET(LIB_PATH ${CMAKE_SOURCE_DIR}/bin/lib /opt/homebrew/lib /opt/homebrew/opt/llvm@17/lib/c++)
     SET(CMAKE_OSX_SYSROOT /Library/Developer/CommandLineTools/SDKs/MacOSX12.1.sdk)
 ENDIF ()
 INCLUDE_DIRECTORIES(BEFORE ${HEADER_PATH})

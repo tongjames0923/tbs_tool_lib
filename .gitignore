@@ -135,6 +135,6 @@ fabric.properties
 # Built Visual Studio Code Extensions
 *.vsix
 
-lib/
-runtime/
+bin/
 build/
+
