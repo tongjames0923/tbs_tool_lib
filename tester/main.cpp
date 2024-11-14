@@ -28,12 +28,12 @@ LoggerWrapper<LogLevel::TRACE> tlogger{consoleLogger};
 
 using namespace tbs::concurrency;
 
-#include <concurrency/lock_operators/operators.h>
+#include <concurrency/adapters.h>
 #include <latch>
 
-mutex_lock_adapter l;
-
 #define N 200
+
+MutexLockAdapter l;
 
 int main(int argc, char *argv[]) {
   int k = 0;

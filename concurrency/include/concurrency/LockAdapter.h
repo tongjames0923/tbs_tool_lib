@@ -49,12 +49,9 @@ public:
   LockAdapter() = default;
 
   virtual ~LockAdapter() {
-
+	m_lock.~T();
   }
 
-  T getLock() const {
-	return m_lock;
-  }
 
   void lock() {
 	m_op.lock(m_lock);
@@ -76,7 +73,6 @@ public:
 	return m_op.heldByCurrentThread(m_lock);
   }
 };
-
 
 }
 
