@@ -30,34 +30,52 @@ using namespace tbs::concurrency;
 
 #include <concurrency/adapters.h>
 #include <latch>
+#include <guard.h>
 
 #define N 200
 
+class A {
+public:
+  int a;
+
+  A() : a(0) {}
+
+  ~A() {
+	LOG_INFO("destructor called");
+  }
+};
 
 TimedMutexLockAdapter l;
 atomic_bool flag = false;
 
 int main(int argc, char *argv[]) {
+  A *ptr = new A();
+  LOG_INFO("ptr: {}", (long long)ptr);
+  {
+	ptr_guard<A *> g(ptr);
 
-  thread t1([&]() {
-	l.lock();
-	flag = true;
-	this_thread::sleep_for(chrono::milliseconds(500));
-	l.unlock();
-  });
-  t1.detach();
-  while (!flag) {
-	this_thread::yield();
   }
-  bool f = l.try_lock(1000);
+  LOG_INFO("ptr: {}", (long long)ptr);
 
-  LOG_INFO("try_lock result: {}", f ? "true" : "false");
-  if (f) {
-	l.unlock();
-  }
-  l.lock();
-  LOG_INFO("locked");
-  l.unlock();
+//  thread t1([&]() {
+//	l.lock();
+//	flag = true;
+//	this_thread::sleep_for(chrono::milliseconds(500));
+//	l.unlock();
+//  });
+//  t1.detach();
+//  while (!flag) {
+//	this_thread::yield();
+//  }
+//  bool f = l.try_lock(1000);
+//
+//  LOG_INFO("try_lock result: {}", f ? "true" : "false");
+//  if (f) {
+//	l.unlock();
+//  }
+//  l.lock();
+//  LOG_INFO("locked");
+//  l.unlock();
 
   return 0;
 }
