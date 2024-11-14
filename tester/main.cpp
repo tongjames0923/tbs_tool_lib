@@ -33,20 +33,31 @@ using namespace tbs::concurrency;
 
 #define N 200
 
-MutexLockAdapter l;
+
+TimedMutexLockAdapter l;
+atomic_bool flag = false;
 
 int main(int argc, char *argv[]) {
-  int k = 0;
-  std::latch lat(N);
-  for (int i = 0; i < N; i++) {
-	thread r([&]() {
-	  l.lock();
-	  std::cout << "thread " << k++ << std::endl;
-	  l.unlock();
-	  lat.count_down();
-	});
-	r.detach();
+
+  thread t1([&]() {
+	l.lock();
+	flag = true;
+	this_thread::sleep_for(chrono::milliseconds(500));
+	l.unlock();
+  });
+  t1.detach();
+  while (!flag) {
+	this_thread::yield();
   }
-  lat.wait();
+  bool f = l.try_lock(1000);
+
+  LOG_INFO("try_lock result: {}", f ? "true" : "false");
+  if (f) {
+	l.unlock();
+  }
+  l.lock();
+  LOG_INFO("locked");
+  l.unlock();
+
   return 0;
 }

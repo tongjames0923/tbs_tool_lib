@@ -45,15 +45,23 @@ public:
   }
 
   bool try_lock(T &m, unsigned long long timeout) override {
-	std::condition_variable cv;
-	std::mutex mtx;
-	std::unique_lock<std::mutex> ul(mtx);
-	auto ret = cv.wait_for(ul, time_utils::ms(timeout), [&]() { return m.try_lock(); });
+	bool ret = false;
+	if constexpr (std::is_base_of<std::timed_mutex, T>::value ||
+				  std::is_base_of<std::recursive_timed_mutex, T>::value) {
+	  ret = m.try_lock_for(time_utils::ms(timeout));
+	} else {
+	  std::condition_variable cv;
+	  std::mutex mtx;
+	  std::unique_lock<std::mutex> ul(mtx);
+	  ret = cv.wait_for(ul, time_utils::ms(timeout), [&]() {
+		bool k = m.try_lock();
+		return k;
+	  });
+	}
 	if (ret) {
 	  std::lock_guard<std::recursive_mutex> g(m_mutex);
 	  m_locks.insert_or_assign(&m, LockInfo<T>{std::this_thread::get_id(), true, &m});
 	}
-
 	return ret;
   }
 
@@ -66,7 +74,7 @@ public:
   void unlock(T &m) override {
 	m.unlock();
 	std::lock_guard<std::recursive_mutex> g(m_mutex);
-	m_locks.insert_or_assign(&m, LockInfo<T>{std::this_thread::get_id(), false, &m});
+	m_locks.erase(&m);
   }
 
 };
