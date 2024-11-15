@@ -12,8 +12,6 @@ using namespace BuiltInLoggers;
 
 ConsoleLogger *consoleLogger = new ConsoleLogger("console");
 
-LoggerWrapper<LogLevel::INFO> logger{consoleLogger};
-
 LoggerWrapper<LogLevel::TRACE> tlogger{consoleLogger};
 
 #define LOGGER_WRAPPER tlogger
@@ -28,51 +26,29 @@ using namespace tbs::concurrency;
 #include <concurrency/adapters.h>
 #include <latch>
 #include <guard.h>
-
+#include <concurrency/containners/ConcurrentQueue.h>
 #define N 10
 
-class A {
-private:
-	int a;
+using _cQ = tbs::concurrency::containners::ConcurrentQueue<int, RecursiveLockAdapter>;
 
-public:
-	A(const int &i = 0) : a(i) {
-	}
+_cQ q;
 
-	int get() const {
-		return a;
-	}
+int main(int argc, char *argv[])
+{
+    thread t1(
+            [&]()
+            {
+                for (int i = 0; i < N; ++i)
+                {
+                    this_thread::sleep_for(time_utils::ms(5000));
+                    q.push(i);
+                }
+            });
+    t1.detach();
+    LOG_INFO("ready to begin");
+    auto i = q.pop();
+    LOG_INFO("got {}", i);
+    _cQ q2 = q;
 
-	~A() {
-		LOG_INFO("destructor called");
-	}
-};
-
-TimedMutexLockAdapter l;
-atomic_bool flag = false;
-
-sync_point::SyncPoint<5> sp;
-
-atomic_int cnt = 0;
-int main(int argc, char *argv[]) {
-	thread t2([]() {
-		LOG_ERROR("thread 2 wait for 50");
-		sp.wait_to_predicate([&]() { return cnt >= N / 2; });
-		LOG_ERROR("thread 2 wait done for 50");
-	});
-	t2.detach();
-	for (int i = 0; i < N; i++) {
-		thread t([i]() {
-			LOG_INFO("thread {} start", i);
-			LOG_WARN("flag is {}", ++cnt);
-			sp.wakeup();
-		});
-		t.detach();
-	}
-
-	LOG_WARN("waiting for flag");
-	// LOG_WARN("flag is {}", sp.getFlag());
-	sp.wait_to_predicate([&]() { return cnt >= N; });
-	LOG_WARN("flag end is {}",cnt.load());
-	return 0;
+    return 0;
 }

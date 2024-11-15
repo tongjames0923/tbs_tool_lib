@@ -86,6 +86,7 @@ class SyncPoint
          */
         int _lock_mutex()
         {
+            _threadSafe_condition.notify_one();
             std::unique_lock<std::mutex> lock(_thread_safe_mutex);
             _threadSafe_condition.wait(
                     lock, [&]()
@@ -206,6 +207,7 @@ class SyncPoint
         void reset()
         {
             _flag = 0;
+            wakeup();
         }
 
         /**
