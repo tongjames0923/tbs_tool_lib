@@ -53,6 +53,20 @@ public:
 	init();
   }
 
+  Guard(Guard &&ref) noexcept: m_ref(ref.m_ref) {
+	ref.m_ref = nullptr;
+  }
+
+  Guard(const Guard &ref) = delete;
+
+  Guard &operator=(const Guard &ref) = delete;
+
+  Guard &operator=(Guard &&ref) noexcept {
+	m_ref = ref.m_ref;
+	ref.m_ref = nullptr;
+	return *this;
+  }
+
 
   T &operator*() noexcept {
 	return *m_ref;
