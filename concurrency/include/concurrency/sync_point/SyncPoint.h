@@ -79,9 +79,9 @@ public:
 	}
 
 	int accumulateFlag(const int &delta) {
-		int k = _flag.fetch_add(delta, std::memory_order_relaxed);
+		const int k = ++_flag;
 		_condition.notify_one();
-		return k + delta;
+		return k;
 	}
 
 	int getFlag() const {
