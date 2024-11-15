@@ -35,10 +35,16 @@ using namespace tbs::concurrency;
 #define N 200
 
 class A {
-public:
+private:
   int a;
+public:
 
-  A() : a(0) {}
+
+  A(const int &i = 0) : a(i) {}
+
+  int get() const {
+	return a;
+  }
 
   ~A() {
 	LOG_INFO("destructor called");
@@ -50,26 +56,31 @@ atomic_bool flag = false;
 
 int main(int argc, char *argv[]) {
 
-  LOG_INFO("start");
-  thread t1([&]() {
-	guard::auto_op_lock_guard<decltype(l)> g(l);
-	flag = true;
-	this_thread::sleep_for(chrono::milliseconds(500));
-	LOG_INFO("will release");
-  });
-  t1.detach();
-  while (!flag) {
-	this_thread::yield();
-  }
-  bool f = l.try_lock(1000);
-
-  LOG_INFO("try_lock result: {}", f ? "true" : "false");
-  if (f) {
-	l.unlock();
-  }
-  l.lock();
-  LOG_INFO("locked");
-  l.unlock();
+  auto ptr = new int(32);
+  cout << ptr << endl;
+  ptr_guard<int *> ag(ptr);
+  cout << *(ag) << endl;
+  cout << *(*(ag)) << endl;
+//  LOG_INFO("start");
+//  thread t1([&]() {
+//	guard::auto_op_lock_guard<decltype(l)> g(l);
+//	flag = true;
+//	this_thread::sleep_for(chrono::milliseconds(500));
+//	LOG_INFO("will release");
+//  });
+//  t1.detach();
+//  while (!flag) {
+//	this_thread::yield();
+//  }
+//  bool f = l.try_lock(1000);
+//
+//  LOG_INFO("try_lock result: {}", f ? "true" : "false");
+//  if (f) {
+//	l.unlock();
+//  }
+//  l.lock();
+//  LOG_INFO("locked");
+//  l.unlock();
 
   return 0;
 }
