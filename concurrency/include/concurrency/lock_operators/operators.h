@@ -19,6 +19,4 @@ using TimedMutexLockOperator = MappedLockOperator<std::timed_mutex>;
 // 定义用于操作带时间限制的递归互斥锁的别名
 using RecursiveTimedLockOperator = MappedLockOperator<std::recursive_timed_mutex>;
 
-
-
 #endif //TBS_TOOL_LIB_CONCURRENCY_INCLUDE_CONCURRENCY_LOCK_OPERATORS_OPERATORS_H
