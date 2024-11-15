@@ -29,7 +29,7 @@ using namespace tbs::concurrency;
 #include <latch>
 #include <guard.h>
 
-#define N 200
+#define N 10
 
 class A {
 private:
@@ -51,21 +51,28 @@ public:
 TimedMutexLockAdapter l;
 atomic_bool flag = false;
 
-sync_point::SyncPoint sp;
+sync_point::SyncPoint<5> sp;
 
-atomic_int count = 0;
+atomic_int cnt = 0;
 int main(int argc, char *argv[]) {
+	thread t2([]() {
+		LOG_ERROR("thread 2 wait for 50");
+		sp.wait_to_predicate([&]() { return cnt >= N / 2; });
+		LOG_ERROR("thread 2 wait done for 50");
+	});
+	t2.detach();
 	for (int i = 0; i < N; i++) {
 		thread t([i]() {
 			LOG_INFO("thread {} start", i);
-			this_thread::sleep_for(time_utils::ms(i<20?100:300));
-			LOG_WARN("flag is {}", sp.accumulateFlag(1));
+			LOG_WARN("flag is {}", ++cnt);
+			sp.wakeup();
 		});
 		t.detach();
 	}
+
 	LOG_WARN("waiting for flag");
 	// LOG_WARN("flag is {}", sp.getFlag());
-	sp.wait_flag(N, time_utils::ms(200));
-	LOG_WARN("flag end is {}", sp.getFlag());
+	sp.wait_to_predicate([&]() { return cnt >= N; });
+	LOG_WARN("flag end is {}",cnt.load());
 	return 0;
 }
