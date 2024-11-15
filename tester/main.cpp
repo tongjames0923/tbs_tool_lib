@@ -12,19 +12,16 @@ using namespace BuiltInLoggers;
 
 ConsoleLogger *consoleLogger = new ConsoleLogger("console");
 
-
 LoggerWrapper<LogLevel::INFO> logger{consoleLogger};
 
-
 LoggerWrapper<LogLevel::TRACE> tlogger{consoleLogger};
-
 
 #define LOGGER_WRAPPER tlogger
 
 #include <log/log_macro.h>
 
 #include <concurrency/LockAdapter.h>
-
+#include <concurrency/sync_point/SyncPoint.h>
 
 using namespace tbs::concurrency;
 
@@ -36,51 +33,39 @@ using namespace tbs::concurrency;
 
 class A {
 private:
-  int a;
+	int a;
+
 public:
+	A(const int &i = 0) : a(i) {
+	}
 
+	int get() const {
+		return a;
+	}
 
-  A(const int &i = 0) : a(i) {}
-
-  int get() const {
-	return a;
-  }
-
-  ~A() {
-	LOG_INFO("destructor called");
-  }
+	~A() {
+		LOG_INFO("destructor called");
+	}
 };
 
 TimedMutexLockAdapter l;
 atomic_bool flag = false;
 
+sync_point::SyncPoint sp;
+
+atomic_int count = 0;
 int main(int argc, char *argv[]) {
-
-  auto ptr = new int(32);
-  cout << ptr << endl;
-  ptr_guard<int *> ag(ptr);
-  cout << *(ag) << endl;
-  cout << *(*(ag)) << endl;
-//  LOG_INFO("start");
-//  thread t1([&]() {
-//	guard::auto_op_lock_guard<decltype(l)> g(l);
-//	flag = true;
-//	this_thread::sleep_for(chrono::milliseconds(500));
-//	LOG_INFO("will release");
-//  });
-//  t1.detach();
-//  while (!flag) {
-//	this_thread::yield();
-//  }
-//  bool f = l.try_lock(1000);
-//
-//  LOG_INFO("try_lock result: {}", f ? "true" : "false");
-//  if (f) {
-//	l.unlock();
-//  }
-//  l.lock();
-//  LOG_INFO("locked");
-//  l.unlock();
-
-  return 0;
+	for (int i = 0; i < N; i++) {
+		thread t([i]() {
+			LOG_INFO("thread {} start", i);
+			this_thread::sleep_for(time_utils::ms(i<20?100:300));
+			LOG_WARN("flag is {}", sp.accumulateFlag(1));
+		});
+		t.detach();
+	}
+	LOG_WARN("waiting for flag");
+	// LOG_WARN("flag is {}", sp.getFlag());
+	sp.wait_flag(N, time_utils::ms(200));
+	LOG_WARN("flag end is {}", sp.getFlag());
+	return 0;
 }
