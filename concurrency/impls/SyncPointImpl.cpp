@@ -13,26 +13,41 @@ SyncPoint::SyncPoint(CONST size_t &wait_count)
 }
 
 void SyncPoint::wait(
-        unsigned long long ms, __predic_functional predic, CONST bool &flagCheck, CONST int &target,
-        CONST bool &       timeLimited)
+        unsigned long long ms, __predic_functional         predic, CONST bool &flagCheck, CONST int &target,
+        CONST bool &       timeLimited, __on_predic_moment m)
 {
-    int                          i = _lock_mutex();
-    std::unique_lock<std::mutex> lock(_mutexs[i]);
+    int i = _lock_mutex();
     if (timeLimited)
     {
-        _conditions[i].wait_for(
+        bool                         pred = false, flag_c = false;
+        std::unique_lock<std::mutex> lock(_mutexs[i]);
+        bool                         r = _conditions[i].wait_for(
                 lock, time_utils::ms(ms), [&]()
                 {
-                    return predic() || (flagCheck && getFlag() >= target);
+                    pred   = predic();
+                    flag_c = flagCheck && getFlag() >= target;
+                    return pred || flag_c;
                 });
+        if (m != nullptr)
+        {
+            m(*this, !r, pred, flagCheck, target);
+        }
     }
     else
     {
+        bool                         pred = false, flag_c = false;
+        std::unique_lock<std::mutex> lock(_mutexs[i]);
         _conditions[i].wait(
                 lock, [&]()
                 {
-                    return predic() || (flagCheck && getFlag() >= target);
+                    pred   = predic();
+                    flag_c = flagCheck && getFlag() >= target;
+                    return pred || flag_c;
                 });
+        if (m != nullptr)
+        {
+            m(*this, false, pred, flagCheck, target);
+        }
     } {
         std::unique_lock<std::mutex> threadLock(_mutexs[_wait_count]);
         _waiting_mutexs.push(i);
