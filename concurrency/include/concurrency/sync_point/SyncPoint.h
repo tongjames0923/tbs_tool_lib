@@ -59,31 +59,13 @@ class SyncPoint
         /**
          * 初始化等待队列。
          */
-        inline void init()
-        {
-            for (size_t i = 0; i < _wait_count; ++i)
-            {
-                _waiting_mutexs.push(i);
-            }
-        }
+        void init();
 
         /**
          * 锁定互斥锁并从等待队列中获取一个可用的互斥锁索引。
          * @return 可用的互斥锁索引。
          */
-        int _lock_mutex()
-        {
-            _conditions[_wait_count].notify_one();
-            std::unique_lock<std::mutex> lock(_mutexs[_wait_count]);
-            _conditions[_wait_count].wait(
-                    lock, [&]()
-                    {
-                        return !_waiting_mutexs.empty();
-                    });
-            int r = _waiting_mutexs.front();
-            _waiting_mutexs.pop();
-            return r;
-        }
+        int _lock_mutex();
 
         /**
          * 私有方法 wait 提供核心的等待逻辑，支持超时和非超时等待。
@@ -95,31 +77,7 @@ class SyncPoint
          */
         void wait(
                 unsigned long long ms, __predic_functional predic, CONST bool &flagCheck, CONST int &target = -1,
-                CONST bool &       timeLimited                                                              = true)
-        {
-            int                          i = _lock_mutex();
-            std::unique_lock<std::mutex> lock(_mutexs[i]);
-            if (timeLimited)
-            {
-                _conditions[i].wait_for(
-                        lock, time_utils::ms(ms), [&]()
-                        {
-                            return predic() || (flagCheck && getFlag() >= target);
-                        });
-            }
-            else
-            {
-                _conditions[i].wait(
-                        lock, [&]()
-                        {
-                            return predic() || (flagCheck && getFlag() >= target);
-                        });
-            } {
-                std::unique_lock<std::mutex> threadLock(_mutexs[_wait_count]);
-                _waiting_mutexs.push(i);
-            }
-            _conditions[_wait_count].notify_one();
-        }
+                CONST bool &       timeLimited                                                              = true);
     public:
         /**
          * 可用等待的互斥锁数量。
@@ -133,11 +91,7 @@ class SyncPoint
         /**
          * 构造函数，初始化等待队列。
          */
-        explicit SyncPoint(CONST size_t &waitCount = 4)
-        : _wait_count{waitCount}, _mutexs(waitCount + 1), _conditions(waitCount + 1)
-        {
-            init();
-        }
+        explicit SyncPoint(CONST size_t &waitCount = 4);
 
         /**
          *  等待直到指定的现代谓词函数返回 true。
