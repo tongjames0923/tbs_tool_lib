@@ -3,7 +3,6 @@
 //
 #include <time_utils.hpp>
 #include <iostream>
-#include <concurrency/containers/ConcurrentQueue.h>
 #include <log/loggers/BuiltInLogger.h>
 #include <match/match_macro.h>
 
@@ -12,6 +11,8 @@ using namespace std;
 using namespace BuiltInLoggers;
 
 ConsoleLogger *consoleLogger = new ConsoleLogger("console");
+
+LoggerWrapper<LogLevel::INFO> logger{consoleLogger};
 
 LoggerWrapper<LogLevel::TRACE> tlogger{consoleLogger};
 
@@ -27,6 +28,7 @@ using namespace tbs::concurrency;
 #include <concurrency/adapters.h>
 #include <latch>
 #include <guard.h>
+#include <concurrency/containers/ConcurrentQueue.h>
 #define N 10
 
 using cQ = containers::ConcurrentQueue<int, RecursiveLockAdapter>;

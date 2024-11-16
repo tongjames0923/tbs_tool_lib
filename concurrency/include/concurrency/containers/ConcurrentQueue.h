@@ -30,7 +30,7 @@ class ConcurrentQueue
         std::queue<T> m_queue;                                                     // 存储元素的队列
         LockType      m_lock;                                                      // 用于同步访问的锁
         using _lock_guard = tbs::concurrency::guard::auto_op_lock_guard<LockType>; // 定义锁的智能指针类型
-        mutable tbs::concurrency::sync_point::SyncPoint<1> m_sync_point;           // 同步点，用于在队列操作中同步线程
+        mutable tbs::concurrency::sync_point::SyncPoint m_sync_point{1};           // 同步点，用于在队列操作中同步线程
 
     public:
         /**
@@ -130,12 +130,16 @@ class ConcurrentQueue
          */
         T pop()
         {
-            m_sync_point.wait_flag(1);
-            _lock_guard l(m_lock);
-            T           t = std::move(m_queue.front());
-            m_queue.pop();
+            T result;
+            m_sync_point.wait_flag(
+                    1, [&](CONST sync_point::SyncPoint &s, bool a, bool b, bool c,CONST int &t)
+                    {
+                        _lock_guard l(m_lock);
+                        result = std::move(m_queue.front());
+                        m_queue.pop();
+                    });
             m_sync_point.accumulateFlag(-1);
-            return std::move(t);
+            return std::move(result);
         }
 
         /**
