@@ -3,6 +3,7 @@
 //
 #include <time_utils.hpp>
 #include <iostream>
+#include <concurrency/containers/ConcurrentQueue.h>
 #include <log/loggers/BuiltInLogger.h>
 #include <match/match_macro.h>
 
@@ -26,12 +27,11 @@ using namespace tbs::concurrency;
 #include <concurrency/adapters.h>
 #include <latch>
 #include <guard.h>
-#include <concurrency/containners/ConcurrentQueue.h>
 #define N 10
 
-using _cQ = tbs::concurrency::containners::ConcurrentQueue<int, RecursiveLockAdapter>;
+using cQ = containers::ConcurrentQueue<int, RecursiveLockAdapter>;
 
-_cQ q;
+cQ q;
 
 int main(int argc, char *argv[])
 {
@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
     LOG_INFO("ready to begin");
     auto i = q.pop();
     LOG_INFO("got {}", i);
-    _cQ q2 = q;
+    cQ q2 = q;
 
     return 0;
 }

@@ -11,8 +11,8 @@
 
 
 
-// 命名空间tbs::concurrency::containners用于定义并发容器
-namespace tbs::concurrency::containners
+// 命名空间tbs::concurrency::containers用于定义并发容器
+namespace tbs::concurrency::containers
 {
 
 /**
