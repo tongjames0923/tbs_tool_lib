@@ -31,10 +31,7 @@ using __predic_functional = std::function<bool()>;
 /**
  * SyncPoint 类用于线程同步，提供多种等待条件和标志的机制。
  *
- * 模板参数：
- * - SAME_TIME_WAIT_COUNT: 同时等待的线程数，默认为 1。
  */
-template<size_t SAME_TIME_WAIT_COUNT = 1>
 class SyncPoint
 {
     private:
@@ -42,27 +39,17 @@ class SyncPoint
          * 原子整型 _flag 用于在不同线程间共享状态。
          */
         std::atomic_int _flag{0};
+        size_t          _wait_count;
 
         /**
          * 互斥锁 _mutexs 用于保护共享资源，避免数据竞争。
          */
-        std::mutex _mutexs[SAME_TIME_WAIT_COUNT + 1];
+        std::vector<std::mutex> _mutexs;
 
         /**
          * 条件变量 _conditions 用于线程间的通信，提高同步效率。
          */
-        std::condition_variable _conditions[SAME_TIME_WAIT_COUNT + 1];
-
-        /**
-         * _thread_safe_mutex 和 _threadSafe_condition 用于管理等待队列。
-         */
-        std::mutex &             _thread_safe_mutex    = _mutexs[SAME_TIME_WAIT_COUNT];
-        std::condition_variable &_threadSafe_condition = _conditions[SAME_TIME_WAIT_COUNT];
-
-        /**
-         * 静态断言确保 SAME_TIME_WAIT_COUNT 大于 0。
-         */
-        static_assert(SAME_TIME_WAIT_COUNT > 0, "SAME_TIME_WAIT_COUNT must be greater than 0");
+        std::vector<std::condition_variable> _conditions;
 
         /**
          * _waiting_mutexs 用于管理等待的互斥锁索引。
@@ -74,7 +61,7 @@ class SyncPoint
          */
         inline void init()
         {
-            for (size_t i = 0; i < SAME_TIME_WAIT_COUNT; ++i)
+            for (size_t i = 0; i < _wait_count; ++i)
             {
                 _waiting_mutexs.push(i);
             }
@@ -86,9 +73,9 @@ class SyncPoint
          */
         int _lock_mutex()
         {
-            _threadSafe_condition.notify_one();
-            std::unique_lock<std::mutex> lock(_thread_safe_mutex);
-            _threadSafe_condition.wait(
+            _conditions[_wait_count].notify_one();
+            std::unique_lock<std::mutex> lock(_mutexs[_wait_count]);
+            _conditions[_wait_count].wait(
                     lock, [&]()
                     {
                         return !_waiting_mutexs.empty();
@@ -128,16 +115,26 @@ class SyncPoint
                             return predic() || (flagCheck && getFlag() >= target);
                         });
             } {
-                std::unique_lock<std::mutex> threadLock(_thread_safe_mutex);
+                std::unique_lock<std::mutex> threadLock(_mutexs[_wait_count]);
                 _waiting_mutexs.push(i);
             }
-            _threadSafe_condition.notify_one();
+            _conditions[_wait_count].notify_one();
         }
     public:
         /**
+         * 可用等待的互斥锁数量。
+         * @return 内部标志。
+         */
+        size_t waitingCount() const
+        {
+            return _wait_count - _waiting_mutexs.size();
+        }
+
+        /**
          * 构造函数，初始化等待队列。
          */
-        SyncPoint()
+        explicit SyncPoint(CONST size_t &waitCount = 4)
+        : _wait_count{waitCount}, _mutexs(waitCount + 1), _conditions(waitCount + 1)
         {
             init();
         }
@@ -313,7 +310,7 @@ class SyncPoint
          */
         void wakeup()
         {
-            for (int i = 0; i < SAME_TIME_WAIT_COUNT; i++)
+            for (int i = 0; i < _wait_count; i++)
             {
                 _conditions[i].notify_one();
             }
