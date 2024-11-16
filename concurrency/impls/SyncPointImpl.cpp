@@ -30,7 +30,7 @@ void SyncPoint::wait(
                 });
         if (m != nullptr)
         {
-            m(*this, !r, pred, flagCheck, target);
+            m(*this, !r, pred, flag_c, target);
         }
     }
     else
