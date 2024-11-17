@@ -32,6 +32,13 @@ class ConcurrentQueue
         using _lock_guard = tbs::concurrency::guard::auto_op_lock_guard<LockType>; // 定义锁的智能指针类型
         mutable tbs::concurrency::sync_point::SyncPoint m_sync_point{1};           // 同步点，用于在队列操作中同步线程
 
+        constexpr static bool __is_shared_lock =
+                std::is_base_of_v<SharedMutexLockAdapter, LockType> || std::is_base_of_v<
+                    SharedTimedMutexLockAdapter, LockType>;
+
+        #if __is_shared_lock==true
+            using _shared_lock_guard = tbs::concurrency::guard::auto_shared_lock_op_guard<LockType>;
+        #endif
     public:
         /**
          * @brief 构造函数，通过移动方式初始化队列
@@ -171,8 +178,13 @@ class ConcurrentQueue
         T &front()
         {
             m_sync_point.wait_flag(1);
+            #if __is_shared_lock==true
+            _shared_lock_guard l(m_lock);
+            return m_queue.front();
+            #else
             _lock_guard l(m_lock);
             return m_queue.front();
+            #endif
         }
 
         /**
@@ -183,8 +195,13 @@ class ConcurrentQueue
         T &back()
         {
             m_sync_point.wait_flag(1);
+            #if __is_shared_lock==true
+            _shared_lock_guard l(m_lock);
+            return m_queue.back();
+            #else
             _lock_guard l(m_lock);
             return m_queue.back();
+            #endif
         }
 
         /**
@@ -195,8 +212,13 @@ class ConcurrentQueue
         CONST T &front() const
         {
             m_sync_point.wait_flag(1);
+            #if __is_shared_lock==true
+            _shared_lock_guard l(m_lock);
+            return m_queue.front();
+            #else
             _lock_guard l(m_lock);
             return m_queue.front();
+            #endif
         }
 
         /**
@@ -207,8 +229,13 @@ class ConcurrentQueue
         CONST T &back() const
         {
             m_sync_point.wait_flag(1);
+            #if __is_shared_lock==true
+            _shared_lock_guard l(m_lock);
+            return m_queue.back();
+            #else
             _lock_guard l(m_lock);
             return m_queue.back();
+            #endif
         }
 
         /**

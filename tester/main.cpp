@@ -31,7 +31,7 @@ using namespace tbs::concurrency;
 #include <concurrency/containers/ConcurrentQueue.h>
 #define N 10
 
-using cQ = containers::ConcurrentQueue<int, RecursiveLockAdapter>;
+using cQ = containers::ConcurrentQueue<int, SharedMutexLockAdapter>;
 
 cQ q;
 
