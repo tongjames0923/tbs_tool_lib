@@ -23,6 +23,8 @@ template<typename T>
 class Lockable
 {
     public:
+        virtual ~Lockable() = default;
+
         /**
          * 尝试锁定指定的资源。
          * 如果资源已经被其他线程锁定，那么调用此方法的线程将会阻塞，直到资源被释放。
@@ -81,7 +83,7 @@ class Lockable
 template<typename T, typename OP>
 class UniqueLockAdapter
 {
-    private:
+    protected:
         T  m_lock; ///< 封装的锁对象
         OP m_op;   ///< 封装的锁操作对象
 
