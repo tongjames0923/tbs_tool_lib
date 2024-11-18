@@ -11,7 +11,7 @@
 /**
  * @brief 命名空间 tbs::concurrency::container 包含并发容器类
  */
-namespace tbs::concurrency::container
+namespace tbs::concurrency::containers
 {
 
 /**

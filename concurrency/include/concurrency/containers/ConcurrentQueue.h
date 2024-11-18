@@ -23,7 +23,7 @@ namespace tbs::concurrency::containers
  * @tparam LockType 锁的类型，用于保护队列的并发访问
  */
 template<typename T, typename LockType>
-class ConcurrentQueue : public virtual container::ConcurrentContainer<std::queue<T>, LockType>
+class ConcurrentQueue : public virtual containers::ConcurrentContainer<std::queue<T>, LockType>
 {
     private:
         mutable sync_point::SyncPoint m_sync_point{1};

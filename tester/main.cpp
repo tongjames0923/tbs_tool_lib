@@ -1,10 +1,10 @@
 //
 // Created by abstergo on 24-11-11.
 //
-#include <time_utils.hpp>
 #include <iostream>
 #include <log/loggers/BuiltInLogger.h>
 #include <match/match_macro.h>
+#include <time_utils.hpp>
 
 using namespace time_utils;
 using namespace std;
@@ -26,14 +26,14 @@ LoggerWrapper<LogLevel::TRACE> tlogger{consoleLogger};
 using namespace tbs::concurrency;
 
 #include <concurrency/adapters.h>
-#include <latch>
-#include <guard.h>
-#include <concurrency/containers/ConcurrentQueue.h>
 #include <concurrency/containers/ConcurrentPriorityQueue.h>
+#include <concurrency/containers/ConcurrentQueue.h>
+#include <guard.h>
+#include <latch>
 #define N 50
 #define TN 2
 
-using cQ = containers::ConcurrentQueue<int, SharedMutexLockAdapter>;
+using cQ = containers::ConcurrentPriorityQueue<int, vector<int>, std::less<int> >;
 
 cQ q;
 
@@ -46,7 +46,6 @@ int main(int argc, char *argv[])
                 {
                     for (int i = 0; i < N / TN; ++i)
                     {
-                        this_thread::sleep_for(time_utils::ms(200));
                         LOG_INFO("push {} {}", k, i);
                         q.push(i);
                     }
@@ -57,7 +56,7 @@ int main(int argc, char *argv[])
     LOG_INFO("ready to begin");
     while (c < N)
     {
-        auto &i = q.back();
+        const int &i = q.top();
         LOG_INFO("got {} {}", i, c);
         q.pop();
         c++;
