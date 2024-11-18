@@ -6,6 +6,7 @@
 #define MAPPEDSHAREDLOCKOPERATOR_H
 #include <concurrency/ParameterableLockAdapter.h>
 #include <shared_mutex>
+#include <thread>
 #include <unordered_map>
 #include <unordered_set>
 #include <time_utils.hpp>
@@ -26,7 +27,7 @@ class MappedSharedLockOperator : public virtual tbs::concurrency::AbstractTwoWay
         static_assert(std::is_base_of_v<std::shared_mutex, T>, "T must be a std::shared_mutex");
 
         // 记录共享锁的信息，键为锁的指针，值为持有该锁的线程集合。
-        std::unordered_map<T *, std::unordered_set<std::thread::id> > _shared_locks{};
+        std::unordered_map<T *, std::unordered_set<std::thread::id>> _shared_locks{};
 
         // 记录独占锁的信息，键为锁的指针，值为持有该锁的线程ID。
         std::unordered_map<T *, std::thread::id> _unique_locks{};
@@ -60,10 +61,6 @@ class MappedSharedLockOperator : public virtual tbs::concurrency::AbstractTwoWay
                 {
                     s.insert(std::this_thread::get_id());
                 }
-                else
-                {
-                    throw std::runtime_error("Cannot lock a shared lock twice");
-                }
             }
         }
 
@@ -82,10 +79,6 @@ class MappedSharedLockOperator : public virtual tbs::concurrency::AbstractTwoWay
             {
                 _unique_locks.insert({&l, std::this_thread::get_id()});
             }
-            else
-            {
-                throw std::runtime_error("Cannot lock a unique lock twice");
-            }
         }
 
         /**
@@ -99,16 +92,16 @@ class MappedSharedLockOperator : public virtual tbs::concurrency::AbstractTwoWay
         void remove_shared_lock_info(T &l)
         {
             std::lock_guard<std::recursive_mutex> g(_mutex_shared_locked);
-            if (!_shared_locks.contains(&l))
+            if (_shared_locks.contains(&l))
             {
-                throw std::runtime_error("Cannot unlock a shared lock that is not locked");
+                auto &s = _shared_locks.at(&l);
+                s.erase(std::this_thread::get_id());
+                if (s.empty())
+                {
+                    _shared_locks.erase(&l);
+                }
             }
-            auto &s = _shared_locks.at(&l);
-            s.erase(std::this_thread::get_id());
-            if (s.empty())
-            {
-                _shared_locks.erase(&l);
-            }
+
         }
 
         /**
@@ -122,11 +115,7 @@ class MappedSharedLockOperator : public virtual tbs::concurrency::AbstractTwoWay
         void remove_unique_lock_info(T &l)
         {
             std::lock_guard<std::recursive_mutex> g(_mutex_unique_locked);
-            if (!_unique_locks.contains(&l))
-            {
-                throw std::runtime_error("Cannot unlock a unique lock that is not locked");
-            }
-            else
+            if (_unique_locks.contains(&l))
             {
                 _unique_locks.erase(&l);
             }

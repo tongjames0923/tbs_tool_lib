@@ -29,28 +29,37 @@ using namespace tbs::concurrency;
 #include <latch>
 #include <guard.h>
 #include <concurrency/containers/ConcurrentQueue.h>
-#define N 10
+#include <concurrency/containers/ConcurrentPriorityQueue.h>
+#define N 100
+#define TN 5
 
-using cQ = containers::ConcurrentQueue<int, SharedMutexLockAdapter>;
+using cQ = containers::ConcurrentPriorityQueue<int>;
 
 cQ q;
 
 int main(int argc, char *argv[])
 {
-    thread t1(
-            [&]()
-            {
-                for (int i = 0; i < N; ++i)
+    for (int k = 0; k < TN; ++k)
+    {
+        thread t1(
+                [&]()
                 {
-                    this_thread::sleep_for(time_utils::ms(5000));
-                    q.push(i);
-                }
-            });
-    t1.detach();
+                    for (int i = 0; i < N / TN; ++i)
+                    {
+                        this_thread::sleep_for(time_utils::ms(200));
+                        q.push(i);
+                    }
+                });
+        t1.detach();
+    }
+
+    int p = 0;
     LOG_INFO("ready to begin");
-    auto i = q.pop();
-    LOG_INFO("got {}", i);
-    cQ q2 = q;
+    while (p < N)
+    {
+        auto i = q.pop();
+        LOG_INFO("got {} {}", i, p++);
+    }
 
     return 0;
 }
