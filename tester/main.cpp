@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
     LOG_INFO("ready to begin");
     while (c < N)
     {
-        auto &i = q.front();
+        auto &i = q.back();
         LOG_INFO("got {} {}", i, c);
         q.pop();
         c++;

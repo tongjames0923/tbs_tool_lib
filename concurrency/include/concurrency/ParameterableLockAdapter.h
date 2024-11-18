@@ -6,8 +6,6 @@
 #define SHAREDLOCKADAPTER_H
 #include <concurrency/LockAdapter.h>
 
-
-
 namespace tbs::concurrency
 {
 
@@ -54,7 +52,7 @@ class ParameterableLockable : public virtual tbs::concurrency::Lockable<T>
          * @param p 锁参数
          * @return 锁定返回 true，否则返回 false
          */
-        virtual bool lockedWithParameter(T &l, CONST P &p)CONST = 0;
+        virtual bool lockedWithParameter(T &l, CONST P &p) CONST = 0;
 
         /**
          * @brief 检查当前线程是否使用特定参数持有锁
@@ -63,7 +61,7 @@ class ParameterableLockable : public virtual tbs::concurrency::Lockable<T>
          * @param p 锁参数
          * @return 当前线程持有锁返回 true，否则返回 false
          */
-        virtual bool heldByCurrentThreadWithParameter(T &l, CONST P &p)CONST = 0;
+        virtual bool heldByCurrentThreadWithParameter(T &l, CONST P &p) CONST = 0;
 
         /**
          * @brief 获取唯一锁参数
@@ -116,7 +114,8 @@ class ParameterableLockable : public virtual tbs::concurrency::Lockable<T>
         }
 
         /**
-         * @brief 实现 heldByCurrentThread 函数，使用 getUniqueLockParameter() 获取参数后调用 heldByCurrentThreadWithParameter
+         * @brief 实现 heldByCurrentThread 函数，使用 getUniqueLockParameter() 获取参数后调用
+         * heldByCurrentThreadWithParameter
          *
          * @param l 锁对象
          * @return 当前线程持有锁返回 true，否则返回 false
@@ -126,7 +125,6 @@ class ParameterableLockable : public virtual tbs::concurrency::Lockable<T>
             return heldByCurrentThreadWithParameter(l, getUniqueLockParameter());
         }
 };
-
 
 // 定义一个模板别名AbstractTwoWaysLockAble，用于表示一个具有双向锁定能力的抽象类型
 // 其中T为锁定的类型，bool表示是否锁定
@@ -145,10 +143,10 @@ using AbstractTwoWaysLockAble = ParameterableLockable<T, bool>;
 template<typename L, typename OP>
 class SharedLockAdapter : public virtual tbs::concurrency::UniqueLockAdapter<L, OP>
 {
-    // 确保OP类型继承自AbstractTwoWaysLockAble，以保证其支持共享锁和独占锁的操作。
-    static_assert(
-            std::is_base_of_v<AbstractTwoWaysLockAble<L>, OP>,
-            "OP must base on AbstractTwoWaysLockAble for sharedLockAdapter");
+        // 确保OP类型继承自AbstractTwoWaysLockAble，以保证其支持共享锁和独占锁的操作。
+        static_assert(
+                std::is_base_of_v<AbstractTwoWaysLockAble<L>, OP>,
+                "OP must base on AbstractTwoWaysLockAble for sharedLockAdapter");
     public:
         // 定义共享锁和独占锁的标志常量。
         constexpr static bool SHARED_LOCK_FLAG = true, UNIQUE_LOCK_FLAG = false;
@@ -193,7 +191,7 @@ class SharedLockAdapter : public virtual tbs::concurrency::UniqueLockAdapter<L, 
          *
          * @return true 如果锁处于共享锁状态，否则返回false。
          */
-        bool lockedShared()CONST
+        bool lockedShared() CONST
         {
             return this->m_op.lockedWithParameter(this->m_lock, SHARED_LOCK_FLAG);
         }
@@ -205,14 +203,11 @@ class SharedLockAdapter : public virtual tbs::concurrency::UniqueLockAdapter<L, 
          *
          * @return true 如果当前线程持有共享锁，否则返回false。
          */
-        bool heldByCurrentThreadShared()CONST
+        bool heldByCurrentThreadShared() CONST
         {
             return this->m_op.heldByCurrentThreadWithParameter(this->m_lock, SHARED_LOCK_FLAG);
         }
-
 };
-
-
 
 namespace guard
 {
@@ -229,14 +224,12 @@ namespace guard
         {
             t.unlockShared();
         }
-    }
-
-
+    } // namespace functions
 
     template<typename T>
-    using auto_shared_lock_op_guard = Guard<T, functions::shared_lock_on_init<T>, functions::shared_on_destroy<T> >;
+    using auto_shared_lock_op_guard = Guard<T, functions::shared_lock_on_init<T>, functions::shared_on_destroy<T>>;
 
-}
-}
+} // namespace guard
+} // namespace tbs::concurrency
 
-#endif //SHAREDLOCKADAPTER_H
+#endif // SHAREDLOCKADAPTER_H
