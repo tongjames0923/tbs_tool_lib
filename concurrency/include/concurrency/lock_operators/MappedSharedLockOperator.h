@@ -27,7 +27,7 @@ class MappedSharedLockOperator : public virtual tbs::concurrency::AbstractTwoWay
         static_assert(std::is_base_of_v<std::shared_mutex, T>, "T must be a std::shared_mutex");
 
         // 记录共享锁的信息，键为锁的指针，值为持有该锁的线程集合。
-        std::unordered_map<T *, std::unordered_set<std::thread::id>> _shared_locks{};
+        std::unordered_map<T *, std::unordered_set<std::thread::id> > _shared_locks{};
 
         // 记录独占锁的信息，键为锁的指针，值为持有该锁的线程ID。
         std::unordered_map<T *, std::thread::id> _unique_locks{};
@@ -61,6 +61,10 @@ class MappedSharedLockOperator : public virtual tbs::concurrency::AbstractTwoWay
                 {
                     s.insert(std::this_thread::get_id());
                 }
+                else
+                {
+                    throw std::runtime_error("lock already exists");
+                }
             }
         }
 
@@ -79,6 +83,10 @@ class MappedSharedLockOperator : public virtual tbs::concurrency::AbstractTwoWay
             {
                 _unique_locks.insert({&l, std::this_thread::get_id()});
             }
+            else
+            {
+                throw std::runtime_error("lock already exists");
+            }
         }
 
         /**
@@ -94,12 +102,20 @@ class MappedSharedLockOperator : public virtual tbs::concurrency::AbstractTwoWay
             std::lock_guard<std::recursive_mutex> g(_mutex_shared_locked);
             if (_shared_locks.contains(&l))
             {
-                auto &s = _shared_locks.at(&l);
-                s.erase(std::this_thread::get_id());
+                auto &s  = _shared_locks.at(&l);
+                auto  ec = s.erase(std::this_thread::get_id());
+                if (ec == 0)
+                {
+                    throw std::runtime_error("shared lock on this thread not found");
+                }
                 if (s.empty())
                 {
                     _shared_locks.erase(&l);
                 }
+            }
+            else
+            {
+                throw std::runtime_error("shared lock not found");
             }
 
         }
@@ -118,6 +134,10 @@ class MappedSharedLockOperator : public virtual tbs::concurrency::AbstractTwoWay
             if (_unique_locks.contains(&l))
             {
                 _unique_locks.erase(&l);
+            }
+            else
+            {
+                throw std::runtime_error("unique lock not found");
             }
         }
     public:
@@ -209,13 +229,14 @@ class MappedSharedLockOperator : public virtual tbs::concurrency::AbstractTwoWay
         {
             if (p)
             {
-                l.unlock_shared();
                 remove_shared_lock_info(l);
+                l.unlock_shared();
             }
             else
             {
-                l.unlock();
                 remove_unique_lock_info(l);
+                l.unlock();
+
             }
         }
 

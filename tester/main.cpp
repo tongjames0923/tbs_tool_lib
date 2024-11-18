@@ -31,7 +31,7 @@ using namespace tbs::concurrency;
 #include <concurrency/containers/ConcurrentQueue.h>
 #include <concurrency/containers/ConcurrentPriorityQueue.h>
 #define N 100
-#define TN 5
+#define TN 10
 
 using cQ = containers::ConcurrentPriorityQueue<int>;
 
@@ -39,26 +39,28 @@ cQ q;
 
 int main(int argc, char *argv[])
 {
-    for (int k = 0; k < TN; ++k)
+    for (int k = 0; k < TN; k++)
     {
         thread t1(
-                [&]()
+                [k]()
                 {
                     for (int i = 0; i < N / TN; ++i)
                     {
                         this_thread::sleep_for(time_utils::ms(200));
+                        LOG_INFO("push {} {}", k, i);
                         q.push(i);
                     }
                 });
         t1.detach();
     }
-
-    int p = 0;
+    int c = 0;
     LOG_INFO("ready to begin");
-    while (p < N)
+    while (c < N)
     {
-        auto i = q.pop();
-        LOG_INFO("got {} {}", i, p++);
+        auto &i = q.top();
+        LOG_INFO("got {} {}", i, c);
+        q.pop();
+        c++;
     }
 
     return 0;
