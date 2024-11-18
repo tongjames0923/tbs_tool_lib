@@ -6,6 +6,7 @@
 #define CONCURRENTQUEUE_H
 
 #include <queue>
+#include <concurrency/containers/ConcurrentContainer.h>
 #include <concurrency/adapters.h>
 #include <concurrency/sync_point/SyncPoint.h>
 
@@ -24,228 +25,105 @@ namespace tbs::concurrency::containers
  * @tparam LockType 锁的类型，用于保护队列的并发访问
  */
 template<typename T, typename LockType>
-class ConcurrentQueue
+class ConcurrentQueue : public virtual container::ConcurrentContainer<std::queue<T>, LockType>
 {
     private:
-        std::queue<T> m_queue;                                                     // 存储元素的队列
-        LockType      m_lock;                                                      // 用于同步访问的锁
-        using _lock_guard = tbs::concurrency::guard::auto_op_lock_guard<LockType>; // 定义锁的智能指针类型
-        mutable tbs::concurrency::sync_point::SyncPoint m_sync_point{1};           // 同步点，用于在队列操作中同步线程
-
-        constexpr static bool __is_shared_lock =
-                std::is_base_of_v<SharedMutexLockAdapter, LockType> || std::is_base_of_v<
-                    SharedTimedMutexLockAdapter, LockType>;
-
-        #if __is_shared_lock==true
-            using _shared_lock_guard = tbs::concurrency::guard::auto_shared_lock_op_guard<LockType>;
-        #endif
+        mutable sync_point::SyncPoint m_sync_point{1};
     public:
-        /**
-         * @brief 构造函数，通过移动方式初始化队列
-         *
-         * @param q 一个右值引用的队列，其内容将被移动到新创建的ConcurrentQueue中
-         */
-        explicit ConcurrentQueue(std::queue<T> &&q)
-        : m_queue(std::move(q))
+        size_t size() const
         {
-            m_sync_point.reset();
-            m_sync_point.accumulateFlag(q.size());
-        }
-
-        ConcurrentQueue(ConcurrentQueue &&q) noexcept
-        : m_queue(std::move(q.m_queue))
-        {
-            m_queue = std::move(q.m_queue);
-            m_sync_point.reset();
-            m_sync_point.accumulateFlag(q.size());
-            q.m_sync_point.reset();
-        }
-
-        ConcurrentQueue &operator=(ConcurrentQueue &&q) noexcept
-        {
-            m_queue = std::move(q.m_queue);
-            m_sync_point.reset();
-            m_sync_point.accumulateFlag(q.size());
-            q.m_sync_point.reset();
-            return *this;
-        }
-
-        ConcurrentQueue(CONST ConcurrentQueue &q)
-        {
-            m_queue = q.m_queue;
-            m_sync_point.reset();
-            m_sync_point.accumulateFlag(q.size());
-        }
-
-        ConcurrentQueue &operator=(CONST ConcurrentQueue &q)
-        {
-            m_queue = q.m_queue;
-            m_sync_point.reset();
-            m_sync_point.accumulateFlag(q.size());
-            return *this;
-        }
-
-        /**
-         * @brief 构造函数，通过拷贝方式初始化队列
-         *
-         * @param q 一个常量引用的队列，其内容将被拷贝到新创建的ConcurrentQueue中
-         */
-        explicit ConcurrentQueue(const std::queue<T> &q)
-        : m_queue(q)
-        {
-            m_sync_point.reset();
-            m_sync_point.accumulateFlag(q.size());
-        }
-
-        /**
-         * @brief 默认构造函数，创建一个空的并发队列
-         */
-        explicit ConcurrentQueue()
-        {
-            m_sync_point.reset();
-            m_sync_point.accumulateFlag(0);
-        }
-
-        /**
-         * @brief 向队列中添加元素，通过移动方式
-         *
-         * @param t 要添加到队列中的元素，通过右值引用传递
-         */
-        void push(T &&t)
-        {
-            _lock_guard l(m_lock);
-            m_queue.push(std::move(t));
-            m_sync_point.accumulateFlag(1);
-        }
-
-        /**
-         * @brief 向队列中添加元素，通过拷贝方式
-         *
-         * @param t 要添加到队列中的元素，通过常量引用传递
-         */
-        void push(const T &t)
-        {
-            _lock_guard l(m_lock);
-            m_queue.push(t);
-            m_sync_point.accumulateFlag(1);
-        }
-
-        /**
-         * @brief 从队列中移除并返回第一个元素
-         *
-         * @return T 移除的元素，通过值返回
-         */
-        T pop()
-        {
-            T result;
-            m_sync_point.wait_flag(
-                    1, [&](CONST sync_point::SyncPoint &s, bool a, bool b, bool c,CONST int &t)
+            size_t _s = 0;
+            this->readAsAtomic(
+                    [&](auto &q)
                     {
-                        _lock_guard l(m_lock);
-                        result = std::move(m_queue.front());
-                        m_queue.pop();
+                        _s = q.size();
                     });
-            m_sync_point.accumulateFlag(-1);
-            return std::move(result);
+            return _s;
         }
 
-        /**
-         * @brief 检查队列是否为空
-         *
-         * @return true 如果队列为空
-         * @return false 如果队列不为空
-         */
-        bool empty()CONST
+        bool empty() const
         {
             return size() == 0;
         }
 
-        /**
-         * @brief 获取队列中元素的数量
-         *
-         * @return size_t 队列中元素的数量
-         */
-        size_t size()CONST
+        void push(const T &item)
         {
-            return m_sync_point.getFlag();
+            this->writeAsAtomic(
+                    [&](auto &q)
+                    {
+                        q.push(item);
+                        m_sync_point.accumulateFlag(1);
+                    });
         }
 
-        /**
-         * @brief 获取队列的第一个元素，不移除它
-         *
-         * @return T& 第一个元素的引用
-         */
-        T &front()
+        void push(T &&item)
         {
-            m_sync_point.wait_flag(1);
-            #if __is_shared_lock==true
-            _shared_lock_guard l(m_lock);
-            return m_queue.front();
-            #else
-            _lock_guard l(m_lock);
-            return m_queue.front();
-            #endif
+            this->writeAsAtomic(
+                    [&](auto &q)
+                    {
+                        q.push(std::move(item));
+                        m_sync_point.accumulateFlag(1);
+                    });
         }
 
-        /**
-         * @brief 获取队列的最后一个元素，不移除它
-         *
-         * @return T& 最后一个元素的引用
-         */
-        T &back()
+        void pop()
         {
-            m_sync_point.wait_flag(1);
-            #if __is_shared_lock==true
-            _shared_lock_guard l(m_lock);
-            return m_queue.back();
-            #else
-            _lock_guard l(m_lock);
-            return m_queue.back();
-            #endif
+            this->writeAsAtomic(
+                    [&](auto &q)
+                    {
+                        if (q.empty())
+                            return;
+                        q.pop();
+                        m_sync_point.accumulateFlag(-1);
+                    });
         }
 
-        /**
-         * @brief 获取队列的第一个元素，不移除它（常量版本）
-         *
-         * @return CONST T& 第一个元素的常量引用
-         */
-        CONST T &front() const
+        T poll()
         {
-            m_sync_point.wait_flag(1);
-            #if __is_shared_lock==true
-            _shared_lock_guard l(m_lock);
-            return m_queue.front();
-            #else
-            _lock_guard l(m_lock);
-            return m_queue.front();
-            #endif
+            T item;
+            m_sync_point.wait_flag(
+                    1, [&](CONST sync_point::SyncPoint &s, bool a, bool b, bool c, CONST int &t)
+                    {
+                        this->writeAsAtomic(
+                                [&](auto &q)
+                                {
+                                    item = std::move(q.front());
+                                    q.pop();
+                                });
+
+                    });
+            m_sync_point.accumulateFlag(-1);
+            return item;
         }
 
-        /**
-         * @brief 获取队列的最后一个元素，不移除它（常量版本）
-         *
-         * @return CONST T& 最后一个元素的常量引用
-         */
-        CONST T &back() const
+        CONST T &front() CONST
         {
-            m_sync_point.wait_flag(1);
-            #if __is_shared_lock==true
-            _shared_lock_guard l(m_lock);
-            return m_queue.back();
-            #else
-            _lock_guard l(m_lock);
-            return m_queue.back();
-            #endif
+            CONST T *item = nullptr;
+            m_sync_point.wait_flag(
+                    1, [&](CONST sync_point::SyncPoint &s, bool a, bool b, bool c, CONST int &t)
+                    {
+                        this->readAsAtomic(
+                                [&](auto &q)
+                                {
+                                    item = &q.back();
+                                });
+                    });
+            return *item;
         }
 
-        /**
-         * @brief 清空队列中的所有元素
-         */
-        void clear()
+        CONST T &back() CONST
         {
-            _lock_guard l(m_lock);
-            m_queue.clear();
-            m_sync_point.reset();
+            CONST T *item = nullptr;
+            this->readAsAtomic(
+                    [&](auto &q)
+                    {
+                        m_sync_point.wait_flag(
+                                1, [&](CONST sync_point::SyncPoint &s, bool a, bool b, bool c, CONST int &t)
+                                {
+                                    item = &q.back();
+                                });
+                    });
+            return *item;
         }
 };
 

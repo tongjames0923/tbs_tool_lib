@@ -30,10 +30,10 @@ using namespace tbs::concurrency;
 #include <guard.h>
 #include <concurrency/containers/ConcurrentQueue.h>
 #include <concurrency/containers/ConcurrentPriorityQueue.h>
-#define N 100
-#define TN 10
+#define N 50
+#define TN 2
 
-using cQ = containers::ConcurrentPriorityQueue<int>;
+using cQ = containers::ConcurrentQueue<int, SharedMutexLockAdapter>;
 
 cQ q;
 
@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
     LOG_INFO("ready to begin");
     while (c < N)
     {
-        auto &i = q.top();
+        auto &i = q.front();
         LOG_INFO("got {} {}", i, c);
         q.pop();
         c++;
