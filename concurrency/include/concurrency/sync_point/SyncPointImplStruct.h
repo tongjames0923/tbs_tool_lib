@@ -5,18 +5,20 @@
 #ifndef SYNCPOINTIMPLSTRUCT_H
 #define SYNCPOINTIMPLSTRUCT_H
 #include <atomic>
-#include <vector>
-#include <queue>
 #include <mutex>
+#include <queue>
+#include <vector>
 
-
+namespace tbs::concurrency::sync_point
+{
 class SyncPoint;
+}
 namespace tbs::concurrency::sync_point::__detail
 {
     struct SyncPointImpl
     {
             private:
-                friend class SyncPoint;
+                friend class tbs::concurrency::sync_point::SyncPoint;
             /**
              * 原子整型 _flag 用于在不同线程间共享状态。
              */
