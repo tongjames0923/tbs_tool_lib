@@ -6,13 +6,13 @@
 #define TBS_TOOL_LIB_CONCURRENCY_INCLUDE_CONCURRENCY_SYNC_POINT_SYNCPOINT_H
 
 #include <atomic>
+#include <concurrency/sync_point/SyncPointImplStruct.h>
 #include <condition_variable>
 #include <defs.h>
 #include <functional>
 #include <queue>
 #include <time_utils.hpp>
 #include <utility>
-
 /**
  * 命名空间 tbs::concurrency::sync_point 用于同步点机制，提供线程同步的工具类。
  */
@@ -41,36 +41,6 @@ class SyncPoint;
 using __on_predic_moment = std::function<void(
         CONST SyncPoint &point, bool isTimeouted, bool isPredicted, bool isFlagCheck, CONST int &targetFlag)>;
 
-namespace
-{
-    struct SyncPointImpl
-    {
-            /**
-             * 原子整型 _flag 用于在不同线程间共享状态。
-             */
-            std::atomic_int _flag{0};
-            size_t          _wait_count;
-
-            /**
-             * 互斥锁 _mutexs 用于保护共享资源，避免数据竞争。
-             */
-            std::vector<std::mutex> _mutexs;
-
-            /**
-             * 条件变量 _conditions 用于线程间的通信，提高同步效率。
-             */
-            std::vector<std::condition_variable> _conditions;
-
-            /**
-             * _waiting_mutexs 用于管理等待的互斥锁索引。
-             */
-            std::queue<size_t> _waiting_mutexs;
-            explicit SyncPointImpl(const size_t& wait_count)
-                : _wait_count{wait_count}, _mutexs{wait_count+1}, _conditions{wait_count+1}
-            {}
-    };
-} // namespace
-
 /**
  * SyncPoint 类用于线程同步，提供多种等待条件和标志的机制。
  *
@@ -78,7 +48,7 @@ namespace
 class SyncPoint
 {
     private:
-        SyncPointImpl _impl;
+        __detail::SyncPointImpl _impl;
         /**
          * 初始化等待队列。
          */
@@ -258,7 +228,7 @@ class SyncPoint
          * 获取当前的内部标志值。
          * @return 当前的标志值。
          */
-        int getFlag() const
+        [[nodiscard]] int getFlag() const
         {
             return _impl._flag;
         }
