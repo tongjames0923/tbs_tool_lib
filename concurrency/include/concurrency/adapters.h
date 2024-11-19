@@ -35,11 +35,11 @@ using RecursiveTimedMutexLockAdapter =
  * @brief 定义共享锁的适配器类型，支持多个读取者同时访问资源。
  */
 using SharedMutexLockAdapter =
-        tbs::concurrency::SharedLockAdapter<std::shared_mutex, MappedSharedLockOperator<std::shared_mutex> >;
+        tbs::concurrency::SharedLockAdapter<std::shared_mutex, MappedSharedLockOperator<std::shared_mutex>>;
 
 /**
  * @brief 定义带超时功能的共享锁适配器类型，支持多个读取者同时访问资源并在指定时间内尝试加锁。
  */
 using SharedTimedMutexLockAdapter = tbs::concurrency::SharedLockAdapter<
-    std::shared
+    std::shared_timed_mutex, MappedSharedLockOperator<std::shared_timed_mutex> >;
 #endif //TBS_TOOL_LIB_CONCURRENCY_INCLUDE_CONCURRENCY_ADAPTERS_H
