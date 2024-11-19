@@ -4,11 +4,9 @@
 
 #ifndef TBS_TOOL_LIB_CONCURRENCY_INCLUDE_CONCURRENCY_LOCKADAPTER_H
 #define TBS_TOOL_LIB_CONCURRENCY_INCLUDE_CONCURRENCY_LOCKADAPTER_H
-#include <guard.h>
 #include <defs.h>
+#include <guard.h>
 #include <unordered_map>
-
-
 
 namespace tbs::concurrency
 {
@@ -70,7 +68,6 @@ class Lockable
         virtual bool heldByCurrentThread(T &) CONST = 0;
 };
 
-
 /**
  * @brief UniqueLockAdapter类模板提供了一种通用的独占锁适配机制
  *
@@ -87,7 +84,7 @@ class UniqueLockAdapter
         T  m_lock; ///< 封装的锁对象
         OP m_op;   ///< 封装的锁操作对象
 
-        //检查op是否继承自 Lockable
+        // 检查op是否继承自 Lockable
         static_assert(std::is_base_of<Lockable<T>, OP>::value, "OP must be derived from Lockable");
     public:
         /**
@@ -95,8 +92,7 @@ class UniqueLockAdapter
          *
          * @param lock 要移动的锁对象
          */
-        explicit UniqueLockAdapter(T &&lock)
-        : m_lock(std::move(lock))
+        explicit UniqueLockAdapter(T &&lock) : m_lock(std::move(lock))
         {}
 
         /**
@@ -208,6 +204,12 @@ namespace guard
 
 
 
+    /**
+     *@brief 自动锁定和解锁的智能指针模板
+     *
+     * 封装了UniqueLockAdapter，并提供了自动锁定和解锁的功能
+     * @tparam T 封装的锁对象类型
+     */
     template<typename T>
     using auto_op_lock_guard = Guard<T, functions::lock_on_init<T>, functions::unlock_on_destroy<T> >;
 }

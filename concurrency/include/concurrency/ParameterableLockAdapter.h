@@ -226,6 +226,11 @@ namespace guard
         }
     } // namespace functions
 
+    /**
+     *@brief 共享锁自动释放模板类，用于在作用域结束时自动释放共享锁。
+     * @tparam T 模板参数，表示要操作的对象类型。
+     *
+     */
     template<typename T>
     using auto_shared_lock_op_guard = Guard<T, functions::shared_lock_on_init<T>, functions::shared_on_destroy<T>>;
 
