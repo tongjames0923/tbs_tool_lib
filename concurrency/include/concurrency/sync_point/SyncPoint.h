@@ -6,12 +6,12 @@
 #define TBS_TOOL_LIB_CONCURRENCY_INCLUDE_CONCURRENCY_SYNC_POINT_SYNCPOINT_H
 
 #include <atomic>
-#include <time_utils.hpp>
+#include <condition_variable>
 #include <defs.h>
 #include <functional>
-#include <condition_variable>
-#include <utility>
 #include <queue>
+#include <time_utils.hpp>
+#include <utility>
 
 /**
  * 命名空间 tbs::concurrency::sync_point 用于同步点机制，提供线程同步的工具类。
@@ -41,6 +41,36 @@ class SyncPoint;
 using __on_predic_moment = std::function<void(
         CONST SyncPoint &point, bool isTimeouted, bool isPredicted, bool isFlagCheck, CONST int &targetFlag)>;
 
+namespace
+{
+    struct SyncPointImpl
+    {
+            /**
+             * 原子整型 _flag 用于在不同线程间共享状态。
+             */
+            std::atomic_int _flag{0};
+            size_t          _wait_count;
+
+            /**
+             * 互斥锁 _mutexs 用于保护共享资源，避免数据竞争。
+             */
+            std::vector<std::mutex> _mutexs;
+
+            /**
+             * 条件变量 _conditions 用于线程间的通信，提高同步效率。
+             */
+            std::vector<std::condition_variable> _conditions;
+
+            /**
+             * _waiting_mutexs 用于管理等待的互斥锁索引。
+             */
+            std::queue<size_t> _waiting_mutexs;
+            explicit SyncPointImpl(const size_t& wait_count)
+                : _wait_count{wait_count}, _mutexs{wait_count+1}, _conditions{wait_count+1}
+            {}
+    };
+} // namespace
+
 /**
  * SyncPoint 类用于线程同步，提供多种等待条件和标志的机制。
  *
@@ -48,27 +78,7 @@ using __on_predic_moment = std::function<void(
 class SyncPoint
 {
     private:
-        /**
-         * 原子整型 _flag 用于在不同线程间共享状态。
-         */
-        std::atomic_int _flag{0};
-        size_t          _wait_count;
-
-        /**
-         * 互斥锁 _mutexs 用于保护共享资源，避免数据竞争。
-         */
-        std::vector<std::mutex> _mutexs;
-
-        /**
-         * 条件变量 _conditions 用于线程间的通信，提高同步效率。
-         */
-        std::vector<std::condition_variable> _conditions;
-
-        /**
-         * _waiting_mutexs 用于管理等待的互斥锁索引。
-         */
-        std::queue<size_t> _waiting_mutexs;
-
+        SyncPointImpl _impl;
         /**
          * 初始化等待队列。
          */
@@ -89,9 +99,9 @@ class SyncPoint
          * @param timeLimited 是否有限制时间。
          * @param m 回调函数，在等待条件达成时调用。
          */
-        void wait(
-                unsigned long long ms, __predic_functional predic, CONST bool &flagCheck, CONST int &target = -1,
-                CONST bool &       timeLimited = true, __on_predic_moment m = nullptr);
+        void
+        wait(unsigned long long ms, __predic_functional predic, CONST bool &flagCheck, CONST int &target = -1,
+             CONST bool &timeLimited = true, __on_predic_moment m = nullptr);
     public:
         /**
          * 可用等待的互斥锁数量。
@@ -99,7 +109,7 @@ class SyncPoint
          */
         size_t waitingCount() const
         {
-            return _wait_count - _waiting_mutexs.size();
+            return _impl._wait_count - _impl._waiting_mutexs.size();
         }
 
         /**
@@ -115,11 +125,7 @@ class SyncPoint
          */
         void wait_to_predicate(__predic_function f, __on_predic_moment m = nullptr)
         {
-            wait_to_predicate(
-                    [&]()
-                    {
-                        return f();
-                    }, std::move(m));
+            wait_to_predicate([&]() { return f(); }, std::move(m));
         }
 
         /**
@@ -139,11 +145,7 @@ class SyncPoint
          */
         void wait_until(CONST time_utils::ms &to, __on_predic_moment m = nullptr)
         {
-            wait_until(
-                    to, [&]()
-                    {
-                        return false;
-                    }, std::move(m));
+            wait_until(to, [&]() { return false; }, std::move(m));
         }
 
         /**
@@ -153,10 +155,8 @@ class SyncPoint
          * @param m 回调函数，在等待条件达成时调用。
          */
         void wait_until(
-                CONST time_utils::ms &timeout, __predic_functional f = []()
-                {
-                    return false;
-                }, __on_predic_moment m = nullptr)
+                CONST time_utils::ms &timeout, __predic_functional f = []() { return false; },
+                __on_predic_moment m = nullptr)
         {
             wait(timeout.count(), std::move(f), false, -1, true, std::move(m));
         }
@@ -166,7 +166,7 @@ class SyncPoint
          */
         void reset()
         {
-            _flag = 0;
+            _impl._flag = 0;
             wakeup();
         }
 
@@ -177,11 +177,7 @@ class SyncPoint
          */
         void wait_flag(CONST int &target, __on_predic_moment m = nullptr)
         {
-            wait_flag(
-                    target, [&]()
-                    {
-                        return false;
-                    }, std::move(m));
+            wait_flag(target, [&]() { return false; }, std::move(m));
         }
 
         /**
@@ -192,11 +188,7 @@ class SyncPoint
          */
         void wait_flag(CONST int &target, __predic_function f, __on_predic_moment m = nullptr)
         {
-            wait_flag(
-                    target, [&]()
-                    {
-                        return f();
-                    }, std::move(m));
+            wait_flag(target, [&]() { return f(); }, std::move(m));
         }
 
         /**
@@ -218,11 +210,7 @@ class SyncPoint
          */
         void wait_flag(CONST int &target, CONST time_utils::ms &m, __on_predic_moment m_on_predic_moment = nullptr)
         {
-            wait_flag(
-                    target, m, [&]()
-                    {
-                        return false;
-                    }, std::move(m_on_predic_moment));
+            wait_flag(target, m, [&]() { return false; }, std::move(m_on_predic_moment));
         }
 
         /**
@@ -261,7 +249,7 @@ class SyncPoint
          */
         int accumulateFlag(const int &delta)
         {
-            const int k = _flag += delta;
+            const int k = _impl._flag += delta;
             wakeup();
             return k;
         }
@@ -272,7 +260,7 @@ class SyncPoint
          */
         int getFlag() const
         {
-            return _flag;
+            return _impl._flag;
         }
 
         /**
@@ -280,9 +268,9 @@ class SyncPoint
          */
         void wakeup()
         {
-            for (int i = 0; i < _wait_count; i++)
+            for (int i = 0; i < _impl._wait_count; i++)
             {
-                _conditions[i].notify_one();
+               _impl. _conditions[i].notify_one();
             }
         }
 };
