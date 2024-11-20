@@ -33,34 +33,33 @@ using namespace tbs::concurrency;
 #define N 50
 #define TN 2
 
-using cQ = containers::ConcurrentPriorityQueue<int, vector<int>, std::less<int> >;
+#include <concurrency/containers/ConcurrentUnorderedMap.h>
 
-cQ q;
-
-int main(int argc, char *argv[])
+tbs::concurrency::containers::ConcurrentUnorderedMap<int, int> mp;
+sync_point::SyncPoint                                          s;
+int                                                            main(int argc, char *argv[])
 {
-    for (int k = 0; k < TN; k++)
+    for (int i = 0; i < TN; i++)
     {
-        thread t1(
-                [k]()
+        thread t(
+                [i]()
                 {
-                    for (int i = 0; i < N / TN; ++i)
+                    for (int j = 0; j < N/TN; j++)
                     {
-                        LOG_INFO("push {} {}", k, i);
-                        q.push(i);
+                        mp.operateIfExists(
+                                i, [](int &v, auto &m) { ++v; },
+                                [i](std::unordered_map<int, int> &m) { m.insert({i, 0}); });
                     }
+                    s.accumulateFlag(1);
                 });
-        t1.detach();
+        t.detach();
     }
-    int c = 0;
-    LOG_INFO("ready to begin");
-    while (c < N)
-    {
-        const int &i = q.top();
-        LOG_INFO("got {} {}", i, c);
-        q.pop();
-        c++;
-    }
-
+    s.wait_flag(TN);
+    mp.foreach (
+            [](CONST pair<int, int> &p)
+            {
+                cout << p.first << ":" << p.second << endl;
+                return true;
+            });
     return 0;
 }
