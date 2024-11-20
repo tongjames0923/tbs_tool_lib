@@ -8,6 +8,7 @@
 #include <mutex>
 #include <queue>
 #include <vector>
+#include <condition_variable>
 
 namespace tbs::concurrency::sync_point
 {
