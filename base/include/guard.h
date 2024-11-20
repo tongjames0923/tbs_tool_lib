@@ -14,73 +14,83 @@ using guard_operator = void (*)(T &);
 
 // 初始化操作
 template<typename T>
-constexpr void delete_ptr_destruction(T &ptr) noexcept {
-  delete ptr;
-  ptr = nullptr;
+constexpr void delete_ptr_destruction(T &ptr) noexcept
+{
+    delete ptr;
+    ptr = nullptr;
 }
 
 // 数组初始化操作
 template<typename T>
-constexpr void delete_array_destruction(T &ptr) noexcept {
-  delete[] ptr;
-  ptr = nullptr;
+constexpr void delete_array_destruction(T &ptr) noexcept
+{
+    delete[] ptr;
+    ptr = nullptr;
 }
 
 // Guard 类
 template<typename T, guard_operator<T> __INIT, guard_operator<T> __DESTRUCTION>
-class Guard {
-private:
-  using __item_type = T *;
-  __item_type m_ref;
+class Guard
+{
+    private:
+        using __item_type = T *;
+        __item_type m_ref;
 
-  // 初始化函数
-  constexpr void init() {
-	if constexpr (__INIT != nullptr) {
-	  if (m_ref != nullptr) {
-		__INIT(*m_ref);
-	  }
-	}
-  }
+        // 初始化函数
+        constexpr void init()
+        {
+            if constexpr (__INIT != nullptr)
+            {
+                if (m_ref != nullptr)
+                {
+                    __INIT(*m_ref);
+                }
+            }
+        }
+    public:
+        // 构造函数
+        explicit Guard(T &ref) NO_EXCEPT : m_ref(&ref)
+        {
+            init();
+        }
+        explicit Guard(__item_type ref) : m_ref(ref)
+        {
+            init();
+        }
 
-public:
+        Guard(Guard &&ref) noexcept : m_ref(ref.m_ref)
+        {
+            ref.m_ref = nullptr;
+        }
 
-  // 构造函数
-  explicit Guard(T &ref) NO_EXCEPT: m_ref(&ref) {
-	init();
-  }
+        Guard(const Guard &ref) = delete;
 
-  explicit Guard(T &&ref) NO_EXCEPT: m_ref(&ref) {
-	init();
-  }
+        Guard &operator=(const Guard &ref) = delete;
 
-  Guard(Guard &&ref) noexcept: m_ref(ref.m_ref) {
-	ref.m_ref = nullptr;
-  }
+        Guard &operator=(Guard &&ref) noexcept
+        {
+            m_ref     = ref.m_ref;
+            ref.m_ref = nullptr;
+            return *this;
+        }
 
-  Guard(const Guard &ref) = delete;
+        T &operator*()
+        {
+            ASSERT(m_ref == nullptr, "guard is nullptr");
+            return *m_ref;
+        }
 
-  Guard &operator=(const Guard &ref) = delete;
-
-  Guard &operator=(Guard &&ref) noexcept {
-	m_ref = ref.m_ref;
-	ref.m_ref = nullptr;
-	return *this;
-  }
-
-
-  T &operator*() noexcept {
-	return *m_ref;
-  }
-
-
-  // 析构函数
-  ~Guard() noexcept {
-	if constexpr (__DESTRUCTION != nullptr) {
-	  if (m_ref != nullptr) {
-		__DESTRUCTION(*m_ref);
-	  }
-	}
-  }
+        // 析构函数
+        ~Guard() noexcept
+        {
+            if constexpr (__DESTRUCTION != nullptr)
+            {
+                if (m_ref != nullptr)
+                {
+                    __DESTRUCTION(*m_ref);
+                }
+            }
+        }
 };
 
 // 指针 Guard
