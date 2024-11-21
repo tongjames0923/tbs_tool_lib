@@ -6,66 +6,35 @@
 #include <match/match_macro.h>
 #include <time_utils.hpp>
 #include <PointerToImpl.h>
+#include <concurrency/sync_point/SyncPoint.h>
+#include <log/log_macro.h>
 
-class TestImpl
-{
-    public:
-        TestImpl()
-        {
-            std::cout << "TestImpl::TestImpl()" << this << std::endl;
-        }
+auto logger = BuiltInLoggers::ConsoleLogger("main");
 
-        int x = 0;
+LoggerWrapper<LogLevel::INFO> g({&logger});
 
-        TestImpl(const TestImpl &) = default;
+#define LOGGER_WRAPPER g
 
-        // TestImpl(TestImpl &&other) noexcept
-        // {
-        //     std::cout << "TestImpl::TestImpl(TestImpl &&other)" << this << std::endl;
-        //     x = std::move(other.x);
-        // }
-        //
-        // TestImpl &operator=(TestImpl &&other) noexcept
-        // {
-        //     std::cout << "TestImpl::operator=(TestImpl &&other)" << this << std::endl;
-        //     x = std::move(other.x);
-        //     return *this;
-        // }
+#include <log/log_macro.h>
 
-        ~TestImpl()
-        {
-            std::cout << "TestImpl::~TestImpl()" << this << std::endl;
-        }
-
-};
-
-class Test : public virtual PointerImpl<TestImpl>
-{
-    public:
-        void printX()
-        {
-            std::cout << "x = " << getImpl().x << std::endl;
-        }
-
-        void set(int x)
-        {
-            getImpl().x = x;
-        }
-
-};
-
-void tx(Test t)
-{
-    t.printX();
-}
 
 int main(int argc, char *argv[])
 {
+    using namespace tbs::concurrency::sync_point;
+    SyncPoint sp;
+    for (int i = 0; i < 5; i++)
+    {
+        std::thread t(
+                [&sp, i]()
+                {
+                    LOG_INFO("thread {} start", i);
+                    sp.accumulateFlag(1);
+                });
+        t.detach();
+    }
+    LOG_INFO("main thread start");
+    sp.wait_flag(5);
+    LOG_INFO("main thread end");
 
-    Test t;
-    t.set(22);
-    Test t1(std::move(t));
-    tx(std::move(t1));
-    t.printX();
     return 0;
 }

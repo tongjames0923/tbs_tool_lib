@@ -31,7 +31,6 @@ add_subdirectory(log)
 
 add_subdirectory(concurrency)
 
-
 add_subdirectory(tester)
 LINK_DIRECTORIES(BEFORE ${LIB_PATH})
 MESSAGE(STATUS "searching for sources...")
