@@ -6,13 +6,14 @@
 #define TBS_TOOL_LIB_CONCURRENCY_INCLUDE_CONCURRENCY_SYNC_POINT_SYNCPOINT_H
 
 #include <atomic>
-#include <concurrency/sync_point/SyncPointImplStruct.h>
 #include <condition_variable>
 #include <defs.h>
 #include <functional>
 #include <queue>
 #include <time_utils.hpp>
 #include <utility>
+
+#include "PointerToImpl.h"
 /**
  * 命名空间 tbs::concurrency::sync_point 用于同步点机制，提供线程同步的工具类。
  */
@@ -41,46 +42,23 @@ class SyncPoint;
 using __on_predic_moment = std::function<void(
         CONST SyncPoint &point, bool isTimeouted, bool isPredicted, bool isFlagCheck, CONST int &targetFlag)>;
 
+
+class SyncPointImpl;
+
+
 /**
  * SyncPoint 类用于线程同步，提供多种等待条件和标志的机制。
  *
  */
-class SyncPoint
+class SyncPoint : public virtual PointerImpl<SyncPointImpl>
+
 {
-    private:
-        __detail::SyncPointImpl _impl;
-        /**
-         * 初始化等待队列。
-         */
-        void init();
-
-        /**
-         * 锁定互斥锁并从等待队列中获取一个可用的互斥锁索引。
-         * @return 可用的互斥锁索引。
-         */
-        int _lock_mutex();
-
-        /**
-         * 私有方法 wait 提供核心的等待逻辑，支持超时和非超时等待。
-         * @param ms 超时时间（毫秒）。
-         * @param predic 谓词函数，决定等待条件。
-         * @param flagCheck 是否检查内部标志。
-         * @param target 目标标志值。
-         * @param timeLimited 是否有限制时间。
-         * @param m 回调函数，在等待条件达成时调用。
-         */
-        void
-        wait(unsigned long long ms, __predic_functional predic, CONST bool &flagCheck, CONST int &target = -1,
-             CONST bool &timeLimited = true, __on_predic_moment m = nullptr);
     public:
         /**
          * 可用等待的互斥锁数量。
          * @return 内部标志。
          */
-        size_t waitingCount() const
-        {
-            return _impl._wait_count - _impl._waiting_mutexs.size();
-        }
+        size_t waitingCount() const;
 
         /**
          * 构造函数，初始化等待队列。
@@ -93,30 +71,20 @@ class SyncPoint
          * @param f 旧式谓词函数。
          * @param m 回调函数，在等待条件达成时调用。
          */
-        void wait_to_predicate(__predic_function f, __on_predic_moment m = nullptr)
-        {
-            wait_to_predicate([&]() { return f(); }, std::move(m));
-        }
+        void wait_to_predicate(__predic_function f, __on_predic_moment m = nullptr);
 
         /**
          * 等待直到指定的现代谓词函数返回 true。
          * @param f 现代谓词函数。
          * @param m 回调函数，在等待条件达成时调用。
          */
-        void wait_to_predicate(__predic_functional f, __on_predic_moment m = nullptr)
-        {
-            wait(0, std::move(f), false, -1, false, std::move(m));
-        }
-
+        void wait_to_predicate(__predic_functional f, __on_predic_moment m = nullptr);
         /**
          * 等待直到指定的时间。
          * @param to 超时时间。
          * @param m 回调函数，在等待条件达成时调用。
          */
-        void wait_until(CONST time_utils::ms &to, __on_predic_moment m = nullptr)
-        {
-            wait_until(to, [&]() { return false; }, std::move(m));
-        }
+        void wait_until(CONST time_utils::ms &to, __on_predic_moment m = nullptr);
 
         /**
          * 等待直到指定的现代谓词函数返回 true 或超时。
@@ -125,30 +93,23 @@ class SyncPoint
          * @param m 回调函数，在等待条件达成时调用。
          */
         void wait_until(
-                CONST time_utils::ms &timeout, __predic_functional f = []() { return false; },
-                __on_predic_moment m = nullptr)
-        {
-            wait(timeout.count(), std::move(f), false, -1, true, std::move(m));
-        }
+                CONST time_utils::ms &timeout, __predic_functional f = []()
+                {
+                    return false;
+                },
+                __on_predic_moment m = nullptr);
 
         /**
          * 重置内部标志为 0。
          */
-        void reset()
-        {
-            _impl._flag = 0;
-            wakeup();
-        }
+        void reset();
 
         /**
          * 等待直到内部标志达到目标值。
          * @param target 目标标志值。
          * @param m 回调函数，在等待条件达成时调用。
          */
-        void wait_flag(CONST int &target, __on_predic_moment m = nullptr)
-        {
-            wait_flag(target, [&]() { return false; }, std::move(m));
-        }
+        void wait_flag(CONST int &target, __on_predic_moment m = nullptr);
 
         /**
          * 等待直到内部标志达到目标值或谓词函数返回 true。
@@ -156,10 +117,7 @@ class SyncPoint
          * @param f 旧式谓词函数。
          * @param m 回调函数，在等待条件达成时调用。
          */
-        void wait_flag(CONST int &target, __predic_function f, __on_predic_moment m = nullptr)
-        {
-            wait_flag(target, [&]() { return f(); }, std::move(m));
-        }
+        void wait_flag(CONST int &target, __predic_function f, __on_predic_moment m = nullptr);
 
         /**
          * 等待直到内部标志达到目标值或现代谓词函数返回 true。
@@ -167,10 +125,7 @@ class SyncPoint
          * @param f 现代谓词函数。
          * @param m 回调函数，在等待条件达成时调用。
          */
-        void wait_flag(CONST int &target, __predic_functional f, __on_predic_moment m = nullptr)
-        {
-            wait(0, std::move(f), true, target, false, std::move(m));
-        }
+        void wait_flag(CONST int &target, __predic_functional f, __on_predic_moment m = nullptr);
 
         /**
          * 等待直到内部标志达到目标值或超时。
@@ -178,10 +133,7 @@ class SyncPoint
          * @param m 超时时间。
          * @param m_on_predic_moment 回调函数，在等待条件达成时调用。
          */
-        void wait_flag(CONST int &target, CONST time_utils::ms &m, __on_predic_moment m_on_predic_moment = nullptr)
-        {
-            wait_flag(target, m, [&]() { return false; }, std::move(m_on_predic_moment));
-        }
+        void wait_flag(CONST int &target, CONST time_utils::ms &m, __on_predic_moment m_on_predic_moment = nullptr);
 
         /**
          * 等待直到内部标志达到目标值、超时或谓词函数返回 true。
@@ -190,14 +142,8 @@ class SyncPoint
          * @param f 旧式谓词函数。
          * @param m 回调函数，在等待条件达成时调用。
          */
-        void wait_flag(CONST int &target, CONST time_utils::ms &ms, __predic_function f, __on_predic_moment m = nullptr)
-        {
-            wait_flag(
-                    target, ms, [&]()
-                    {
-                        return f();
-                    }, std::move(m));
-        }
+        void wait_flag(
+                CONST int &target, CONST time_utils::ms &ms, __predic_function f, __on_predic_moment m = nullptr);
 
         /**
          * 等待直到内部标志达到目标值、超时或现代谓词函数返回 true。
@@ -207,43 +153,33 @@ class SyncPoint
          * @param m 回调函数，在等待条件达成时调用。
          */
         void wait_flag(
-                CONST int &target, CONST time_utils::ms &ms, __predic_functional f, __on_predic_moment m = nullptr)
-        {
-            wait(ms.count(), std::move(f), true, target, true, std::move(m));
-        }
+                CONST int &target, CONST time_utils::ms &ms, __predic_functional f, __on_predic_moment m = nullptr);
 
         /**
          * 增加内部标志的值并通知一个等待的线程。
          * @param delta 增加的值。
          * @return 增加后的标志值。
          */
-        int accumulateFlag(const int &delta)
-        {
-            const int k = _impl._flag += delta;
-            wakeup();
-            return k;
-        }
+        int accumulateFlag(const int &delta);
 
         /**
          * 获取当前的内部标志值。
          * @return 当前的标志值。
          */
-        [[nodiscard]] int getFlag() const
-        {
-            return _impl._flag;
-        }
-
+        [[nodiscard]] int getFlag() const;
         /**
          * 唤醒所有等待的线程。防止等待睡死
          */
-        void wakeup()
-        {
-            for (int i = 0; i < _impl._wait_count; i++)
-            {
-               _impl. _conditions[i].notify_one();
-            }
-        }
+        void wakeup();
+
+        void operator()(SyncPointImpl *ptr) override;
+
+        DELETE_COPY_ASSIGNMENT(SyncPoint)
+        DELETE_COPY_CONSTRUCTION(SyncPoint)
+        DEFAULT_MOVE_ASSIGNMENT(SyncPoint)
+        DEFAULT_MOVE_CONSTRUCTION(SyncPoint)
 };
-}
+
+};
 
 #endif // TBS_TOOL_LIB_CONCURRENCY_INCLUDE_CONCURRENCY_SYNC_POINT_SYNCPOINT_H
