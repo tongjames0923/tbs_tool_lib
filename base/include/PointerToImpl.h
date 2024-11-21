@@ -25,36 +25,40 @@ class PointerImpl
             return *m_impl;
         }
     public:
-        PointerImpl(IMPL *impl_pointer = new IMPL())
+        explicit PointerImpl(IMPL *impl_pointer = new IMPL())
         {
             m_impl.reset(impl_pointer);
         }
 
-        explicit PointerImpl(const PointerImpl &other)
+        template<typename T=IMPL>
+
+        explicit PointerImpl(std::enable_if_t<std::is_copy_constructible_v<T>, const PointerImpl &> other)
         {
             m_impl = std::make_unique<IMPL>(*other.m_impl);
         }
 
-        PointerImpl(PointerImpl &&other) noexcept
+        template<typename T=IMPL>
+        explicit PointerImpl(std::enable_if_t<std::is_move_constructible_v<T>, PointerImpl &&> other) noexcept
         {
             m_impl.reset(other.m_impl.release());
         }
 
-        PointerImpl &operator=(const PointerImpl &other)
+        template<typename T=IMPL>
+        PointerImpl &operator=(std::enable_if_t<std::is_copy_assignable_v<T>, const PointerImpl &> other)
         {
             m_impl = std::make_unique<IMPL>(*other.m_impl);
             return *this;
         }
 
-        PointerImpl &operator=(PointerImpl &&other) noexcept
+        template<typename T=IMPL>
+        PointerImpl &operator=(
+                typename std::enable_if_t<std::is_move_assignable_v<T>, PointerImpl &&> other) noexcept
         {
             m_impl.reset(other.m_impl.release());
             return *this;
         }
 
         virtual ~PointerImpl() = default;
-
-
 };
 
 #endif //POINTERTOIMPL_H

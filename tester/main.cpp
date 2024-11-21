@@ -17,12 +17,26 @@ class TestImpl
 
         int x = 0;
 
+        TestImpl(const TestImpl &) = default;
+
+        // TestImpl(TestImpl &&other) noexcept
+        // {
+        //     std::cout << "TestImpl::TestImpl(TestImpl &&other)" << this << std::endl;
+        //     x = std::move(other.x);
+        // }
+        //
+        // TestImpl &operator=(TestImpl &&other) noexcept
+        // {
+        //     std::cout << "TestImpl::operator=(TestImpl &&other)" << this << std::endl;
+        //     x = std::move(other.x);
+        //     return *this;
+        // }
+
         ~TestImpl()
         {
             std::cout << "TestImpl::~TestImpl()" << this << std::endl;
         }
 
-        TestImpl(const TestImpl &) = default;
 };
 
 class Test : public virtual PointerImpl<TestImpl>
@@ -38,8 +52,6 @@ class Test : public virtual PointerImpl<TestImpl>
             getImpl().x = x;
         }
 
-        Test()
-        {}
 };
 
 void tx(Test t)
@@ -52,8 +64,8 @@ int main(int argc, char *argv[])
 
     Test t;
     t.set(22);
-    Test t1(t);
-    tx(t1);
+    Test t1(std::move(t));
+    tx(std::move(t1));
     t.printX();
     return 0;
 }
