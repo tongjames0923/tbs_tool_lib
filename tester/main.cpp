@@ -1,13 +1,13 @@
 //
 // Created by abstergo on 24-11-11.
 //
+#include <PointerToImpl.h>
+#include <concurrency/sync_point/SyncPoint.h>
 #include <iostream>
+#include <log/log_macro.h>
 #include <log/loggers/BuiltInLogger.h>
 #include <match/match_macro.h>
 #include <time_utils.hpp>
-#include <PointerToImpl.h>
-#include <concurrency/sync_point/SyncPoint.h>
-#include <log/log_macro.h>
 
 auto logger = BuiltInLoggers::ConsoleLogger("main");
 
@@ -16,7 +16,6 @@ LoggerWrapper<LogLevel::INFO> g({&logger});
 #define LOGGER_WRAPPER g
 
 #include <log/log_macro.h>
-
 
 int main(int argc, char *argv[])
 {
@@ -28,7 +27,7 @@ int main(int argc, char *argv[])
                 [&sp, i]()
                 {
                     LOG_INFO("thread {} start", i);
-                    std::this_thread::sleep_for(std::chrono::milliseconds(300 * i));
+                    std::this_thread::sleep_for(std::chrono::milliseconds(100 * i));
                     sp.accumulateFlag(1);
                 });
         t.detach();
