@@ -220,11 +220,11 @@ void SyncPoint::wakeup()
     }
 }
 
-void SyncPoint::operator()(SyncPointImpl *ptr)
-{
-    delete ptr;
-    ptr = nullptr;
-}
+// void SyncPoint::operator()(SyncPointImpl *ptr)
+// {
+//     delete ptr;
+//     ptr = nullptr;
+// }
 
 
 } // namespace tbs::concurrency::sync_point

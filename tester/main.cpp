@@ -28,6 +28,7 @@ int main(int argc, char *argv[])
                 [&sp, i]()
                 {
                     LOG_INFO("thread {} start", i);
+                    std::this_thread::sleep_for(std::chrono::milliseconds(300 * i));
                     sp.accumulateFlag(1);
                 });
         t.detach();
