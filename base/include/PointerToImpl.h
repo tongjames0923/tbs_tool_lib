@@ -10,19 +10,23 @@
 #include <memory>
 #include <cassert>
 
+class Resetor;
+
 /**
  * 模板类PointerImpl实现了指向实现的指针，用于封装实际的实现细节。
  * 这种模式通常用于隐藏实际的实现细节，提供一种更清晰的接口。
  *
  * @tparam IMPL 实际实现的类类型。
+ * @tparam  R 资源释放器类型，默认为Resetor。
  */
-template<typename IMPL>
+template<typename IMPL, typename R=Resetor>
 class PointerImpl
 {
     private:
         using IMPL_PTR = IMPL *;
         // 封装实现类的智能指针，确保资源的正确管理。
         IMPL_PTR m_impl = nullptr;
+        R        m_reset;
     protected:
         /**
          * 获取实现类的常引用。
@@ -46,19 +50,16 @@ class PointerImpl
             return *m_impl;
         }
 
-        /**
-         *@brief  重置指针。
-         * @param p 指向新实现类的指针。
-         */
         void reset(IMPL *p)
         {
+
             if (p == this->m_impl)
             {
                 return;
             }
             if (m_impl != nullptr)
             {
-                this->operator()(m_impl);
+                m_reset.operator()(m_impl);
             }
 
             m_impl = p;
@@ -137,18 +138,23 @@ class PointerImpl
             return *this;
         }
 
-        /**
-         *@brief  释放指针。
-         *
-         * @param ptr 待释放的指针。
-         */
-        virtual void operator ()(IMPL *ptr) =0;
-
-
         virtual ~PointerImpl()
         {
             reset(nullptr);
         }
+};
+
+/**
+ * 默认的资源释放器，用于释放指针所指向的资源。
+ */
+struct Resetor
+{
+    template<typename T>
+    void operator()(T *ptr)
+    {
+        delete ptr;
+        ptr = nullptr;
+    }
 };
 
 #endif //POINTERTOIMPL_H
