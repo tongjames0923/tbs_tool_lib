@@ -7,9 +7,6 @@
 #define SYNCPOINTIMPL_H
 #include <atomic>
 #include <concurrency/sync_point/SyncPoint.h>
-#include <condition_variable>
-#include <defs.h>
-#include <queue>
 namespace tbs::concurrency::sync_point
 {
     class SyncPointImpl
@@ -52,9 +49,9 @@ namespace tbs::concurrency::sync_point
                            __predic_functional predic,
                            const bool& flagCheck,
                            const int& target,
-                           const size_t i,
-                           bool pred,
-                           bool flag_c,
+                           const size_t& i,
+                           bool& pred,
+                           bool& flag_c,
                            bool& r,
                            std::unique_lock<std::mutex>& lock)
         {
@@ -67,7 +64,7 @@ namespace tbs::concurrency::sync_point
                                             return pred || flag_c;
                                         });
         }
-        void predictWait(__predic_functional predic, const bool& flagCheck, const int& target, const size_t i, bool pred, bool flag_c, std::unique_lock<std::mutex>& lock)
+        void predictWait(__predic_functional predic, const bool& flagCheck, const int& target, const size_t& i, bool& pred, bool& flag_c, std::unique_lock<std::mutex>& lock)
         {
             _conditions[i].wait(lock,
                                 [&]()
@@ -77,10 +74,18 @@ namespace tbs::concurrency::sync_point
                                     return pred || flag_c;
                                 });
         }
-        void wait(CONST time_utils::ms& ms, SyncPoint& sp, __predic_functional predic, CONST bool& flagCheck, CONST int& target, CONST bool& timeLimited, __on_predic_moment m)
+        void wait_impl(const time_utils::ms& ms,
+                       SyncPoint& sp,
+                       __predic_functional predic,
+                       const bool& flagCheck,
+                       const int& target,
+                       const bool& timeLimited,
+                       __on_predic_moment m,
+                       const size_t& i)
         {
-            const size_t i = _lock_mutex();
-            bool pred = false, flag_c = false, r = false;
+            bool pred = false;
+            bool flag_c = false;
+            bool r = false;
             std::unique_lock<std::mutex> lock(_mutexs[i]);
             if (timeLimited)
             {
@@ -93,6 +98,13 @@ namespace tbs::concurrency::sync_point
             if (m != nullptr)
             {
                 m(sp, !r, pred, flag_c, target);
+            }
+        }
+        void wait(CONST time_utils::ms& ms, SyncPoint& sp, __predic_functional predic, CONST bool& flagCheck, CONST int& target, CONST bool& timeLimited, __on_predic_moment m)
+        {
+            const size_t i = _lock_mutex();
+            {
+                wait_impl(ms, sp, predic, flagCheck, target, timeLimited, m, i);
             }
             {
                 std::unique_lock<std::mutex> threadLock(_mutexs[_wait_count]);
