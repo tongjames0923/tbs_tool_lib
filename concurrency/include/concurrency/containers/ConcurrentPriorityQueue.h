@@ -15,22 +15,19 @@
 namespace tbs::concurrency::containers
 {
 
-/**
- * @brief 线程安全的优先队列模板类。
- *
- * 该类实现了一个支持并发访问的优先队列。它继承自 `ConcurrentContainer` 并使用 `SyncPoint` 进行同步。
- *
- * @tparam T 存储在队列中的元素类型。
- * @tparam CONTAINER 底层容器类型，默认为 `std::vector<T>`。
- * @tparam COMPARE 比较函数类型，默认为 `std::greater_equal<T>`。
- * @tparam LOCK 用于同步的锁类型，默认为 `::SharedMutexLockAdapter`。
- */
-template<
-        typename T, typename CONTAINER = std::vector<T>, typename COMPARE = std::greater_equal<T>,
-        typename LOCK = ::SharedMutexLockAdapter>
-class ConcurrentPriorityQueue
-    : public virtual concurrency::containers::ConcurrentContainer<std::priority_queue<T, CONTAINER, COMPARE>, LOCK>
-{
+    /**
+     * @brief 线程安全的优先队列模板类。
+     *
+     * 该类实现了一个支持并发访问的优先队列。它继承自 `ConcurrentContainer` 并使用 `SyncPoint` 进行同步。
+     *
+     * @tparam T 存储在队列中的元素类型。
+     * @tparam CONTAINER 底层容器类型，默认为 `std::vector<T>`。
+     * @tparam COMPARE 比较函数类型，默认为 `std::greater_equal<T>`。
+     * @tparam LOCK 用于同步的锁类型，默认为 `::SharedMutexLockAdapter`。
+     */
+    template <typename T, typename CONTAINER = std::vector<T>, typename COMPARE = std::greater_equal<T>, typename LOCK = ::SharedMutexLockAdapter>
+    class ConcurrentPriorityQueue : public virtual concurrency::containers::ConcurrentContainer<std::priority_queue<T, CONTAINER, COMPARE>, LOCK>
+    {
     private:
         mutable sync_point::SyncPoint m_syncPoint; // 用于同步的 SyncPoint 对象
         using Base = ConcurrentContainer<std::priority_queue<T, CONTAINER, COMPARE>, LOCK>; // 基类别名
@@ -40,14 +37,14 @@ class ConcurrentPriorityQueue
          *
          * @param val 要添加的元素。
          */
-        void push(const T &val)
+        void push(const T& val)
         {
             Base::writeAsAtomic(
-                    [&](auto &q)
-                    {
-                        q.push(val);                   // 将元素添加到队列中
-                        m_syncPoint.accumulateFlag(1); // 更新同步标志
-                    });
+                [&](auto& q)
+                {
+                    q.push(val); // 将元素添加到队列中
+                    m_syncPoint.accumulateFlag(1); // 更新同步标志
+                });
         }
 
         /**
@@ -56,15 +53,15 @@ class ConcurrentPriorityQueue
         void pop()
         {
             Base::writeAsAtomic(
-                    [&](auto &q)
+                [&](auto& q)
+                {
+                    if (q.empty())
                     {
-                        if (q.empty())
-                        {
-                            return; // 队列为空时直接返回
-                        }
-                        q.pop();                        // 移除队列顶部元素
-                        m_syncPoint.accumulateFlag(-1); // 更新同步标志
-                    });
+                        return; // 队列为空时直接返回
+                    }
+                    q.pop(); // 移除队列顶部元素
+                    m_syncPoint.accumulateFlag(-1); // 更新同步标志
+                });
         }
 
         /**
@@ -75,20 +72,19 @@ class ConcurrentPriorityQueue
         T poll()
         {
             std::optional<T> ret;
-            m_syncPoint.wait_flag(
-                    1,
-                    [&](CONST sync_point::SyncPoint &s, bool a, bool b, bool c, CONST int &t)
-                    {
-                        Base::readAsAtomic(
-                                [&](auto &q)
-                                {
-                                    if (!q.empty())
-                                    {
-                                        ret = q.top(); // 获取队列顶部元素
-                                        q.pop();       // 移除队列顶部元素
-                                    }
-                                });
-                    });
+            m_syncPoint.wait_flag(1,
+                                  [&](CONST sync_point::SyncPoint& s, bool a, bool b, bool c, CONST int& t)
+                                  {
+                                      Base::writeAsAtomic(
+                                          [&](auto& q)
+                                          {
+                                              if (!q.empty())
+                                              {
+                                                  ret = q.top(); // 获取队列顶部元素
+                                                  q.pop(); // 移除队列顶部元素
+                                              }
+                                          });
+                                  });
             m_syncPoint.accumulateFlag(-1); // 更新同步标志
             return ret.value();
         }
@@ -98,19 +94,18 @@ class ConcurrentPriorityQueue
          *
          * @return 队列顶部的元素引用。
          */
-        CONST T &top() CONST
+        CONST T& top() CONST
         {
-            CONST T *ret = nullptr;
-            m_syncPoint.wait_flag(
-                    1,
-                    [&](CONST sync_point::SyncPoint &s, bool a, bool b, bool c, CONST int &t)
-                    {
-                        readAsAtomic(
-                                [&](auto &q)
-                                {
-                                    ret = &q.top(); // 获取队列顶部元素的指针
-                                });
-                    });
+            CONST T* ret = nullptr;
+            m_syncPoint.wait_flag(1,
+                                  [&](CONST sync_point::SyncPoint& s, bool a, bool b, bool c, CONST int& t)
+                                  {
+                                      readAsAtomic(
+                                          [&](auto& q)
+                                          {
+                                              ret = &q.top(); // 获取队列顶部元素的指针
+                                          });
+                                  });
             return *ret; // 返回队列顶部元素的引用
         }
 
@@ -122,16 +117,15 @@ class ConcurrentPriorityQueue
         T top()
         {
             std::optional<T> ret;
-            m_syncPoint.wait_flag(
-                    1,
-                    [&](CONST sync_point::SyncPoint &s, bool a, bool b, bool c, CONST int &t)
-                    {
-                        Base::readAsAtomic(
-                                [&](auto &q)
-                                {
-                                    ret = q.top(); // 获取队列顶部元素
-                                });
-                    });
+            m_syncPoint.wait_flag(1,
+                                  [&](CONST sync_point::SyncPoint& s, bool a, bool b, bool c, CONST int& t)
+                                  {
+                                      Base::readAsAtomic(
+                                          [&](auto& q)
+                                          {
+                                              ret = q.top(); // 获取队列顶部元素
+                                          });
+                                  });
             return ret.value(); // 返回队列顶部元素
         }
 
