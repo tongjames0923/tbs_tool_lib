@@ -90,7 +90,10 @@ namespace tbs::concurrency::containers
                                               });
                                       }
                                   });
-            m_syncPoint.accumulateFlag(-1); // 更新同步标志
+            if (ret.has_value())
+            {
+                m_syncPoint.accumulateFlag(-1); // 更新同步标志
+            }
             return ret;
         }
 
