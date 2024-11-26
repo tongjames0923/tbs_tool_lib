@@ -16,11 +16,6 @@ namespace tbs::threads
 
     auto logger = BuiltInLoggers::ConsoleLogger("threadPool Impl");
 
-#ifndef LOG_LEVEL
-#define LOG_LEVEL LogLevel::INFO
-#endif
-
-
     LoggerWrapper<(LogLevel)LOG_LEVEL> g({&logger});
 
 #define LOGGER_WRAPPER g

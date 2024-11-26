@@ -8,6 +8,10 @@
 #include <tbs/defs.h>
 #include <vector>
 
+#ifndef LOG_LEVEL
+#define LOG_LEVEL 1
+#endif
+
 /**
  * @brief 日志级别枚举
  *

@@ -9,9 +9,6 @@
 #undef LOG_DEBUG
 #undef LOG_TRACE
 
-// 包含日志库的头文件
-#include <tbs/log/log.hpp>
-
 // 根据是否定义了 LOGGER_WRAPPER 宏来定义不同的日志级别宏
 #ifndef LOGGER_WRAPPER
 // 如果没有定义 LOGGER_WRAPPER，使用传入的 wrapper 对象进行日志记录
@@ -61,9 +58,4 @@
 #define LOG_TRACE(...) LOGGER_WRAPPER.trace(LOG_FORMAT(__VA_ARGS__).c_str())
 /// @brief 记录 TRACE 级别的日志
 /// @param ... 可变参数列表，用于格式化日志消息
-#endif
-
-// 如果定义了 LOGGER_WRAPPER，解除其定义
-#ifdef LOGGER_WRAPPER
-#undef LOGGER_WRAPPER
 #endif
