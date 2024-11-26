@@ -10,7 +10,6 @@
 #pragma warning(disable : 4150)
 
 
-#include <cassert>
 #include <tbs/defs.h>
 #include <memory>
 

@@ -5,7 +5,6 @@
 #ifndef TBS_TOOL_LIB_INCLUDE_MATCH_MATCH_EXPRESSION_H
 #define TBS_TOOL_LIB_INCLUDE_MATCH_MATCH_EXPRESSION_H
 
-#include <tbs/type_check.h>
 #include <tbs/match/expressions/RelationExpressions.h>
 
 /**

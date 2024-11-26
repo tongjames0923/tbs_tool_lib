@@ -8,7 +8,7 @@
 #undef LOG_DEBUG
 #undef LOG_TRACE
 
-#include <log/log.hpp>
+#include <tbs/log/log.hpp>
 
 #ifndef LOGGER_WRAPPER
 #define LOG_INFO(wrapper, ...) wrapper.info(LOG_FORMAT(__VA_ARGS__).c_str())

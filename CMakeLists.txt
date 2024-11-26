@@ -63,7 +63,7 @@ ENDIF ()
 # 设置包含目录
 target_include_directories(tbs_tool_lib PUBLIC ${HEADER_PATH} ${PROJECT_HEAD} ${INLS_SOURCE})
 
-# 添加依赖关系
+## 添加依赖关系
 add_dependencies(tbs_tool_lib tbs_tool_base tbs_log tbs_tool_concurrency)
 
 # 安装库文件

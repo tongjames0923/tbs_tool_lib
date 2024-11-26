@@ -1,12 +1,11 @@
 //
 // Created by abstergo on 24-11-11.
 //
-#include <tbs/PointerToImpl.h>
-#include <concurrency/sync_point/SyncPoint.h>
+#include <tbs/concurrency/sync_point/SyncPoint.h>
 #include <iostream>
-#include <log/log_macro.h>
-#include <log/loggers/BuiltInLogger.h>
-#include <tbs/match/match_macro.h>
+#include <tbs/PointerToImpl.h>
+#include <tbs/log/log.hpp>
+#include <tbs/log/loggers/BuiltInLogger.h>
 #include <tbs/threads/ThreadPool.h>
 #include <tbs/time_utils.hpp>
 using namespace tbs::threads;
@@ -17,9 +16,7 @@ LoggerWrapper<LogLevel::INFO> g({&logger});
 
 #define TASK 16
 #define LOGGER_WRAPPER g
-
-#include <log/log_macro.h>
-
+#include <tbs/log/log_macro.h>
 int main(int argc, char* argv[])
 {
     using namespace tbs::concurrency::sync_point;

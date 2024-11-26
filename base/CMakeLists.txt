@@ -56,7 +56,7 @@ ELSE ()
     ADD_LIBRARY(tbs_tool_base SHARED ${HEADERS} ${HEADER_INLS} ${SOURCES})
 
 ENDIF ()
-target_include_directories(tbs_tool_base PUBLIC ${HEADER_PATH} ${PROJECT_HEAD} ${INLS_SOURCE})
+target_include_directories(tbs_tool_base PRIVATE ${HEADER_PATH} ${PROJECT_HEAD} ${INLS_SOURCE})
 # 安装库文件
 install(TARGETS tbs_tool_base DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 

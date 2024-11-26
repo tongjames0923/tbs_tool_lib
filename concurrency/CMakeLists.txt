@@ -55,7 +55,7 @@ ELSE ()
     ADD_LIBRARY(tbs_tool_concurrency SHARED ${HEADERS} ${HEADER_INLS} ${SOURCES})
 
 ENDIF ()
-target_include_directories(tbs_tool_concurrency PUBLIC ${HEADER_PATH} ${PROJECT_HEAD} ${INLS_SOURCE})
+target_include_directories(tbs_tool_concurrency PRIVATE ${HEADER_PATH} ${PROJECT_HEAD} ${INLS_SOURCE})
 add_dependencies(tbs_tool_concurrency tbs_tool_base tbs_log)
 # 安装库文件
 install(TARGETS tbs_tool_concurrency DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)

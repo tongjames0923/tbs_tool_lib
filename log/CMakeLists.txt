@@ -55,7 +55,7 @@ ELSE ()
     ADD_LIBRARY(tbs_log SHARED ${HEADERS} ${HEADER_INLS} ${SOURCES})
 
 ENDIF ()
-target_include_directories(tbs_log PUBLIC ${HEADER_PATH} ${PROJECT_HEAD} ${INLS_SOURCE})
+target_include_directories(tbs_log PRIVATE ${HEADER_PATH} ${PROJECT_HEAD} ${INLS_SOURCE})
 add_dependencies(tbs_log tbs_tool_base)
 # 安装库文件
 install(TARGETS tbs_log DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
