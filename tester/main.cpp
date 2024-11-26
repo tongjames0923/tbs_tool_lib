@@ -1,14 +1,14 @@
 //
 // Created by abstergo on 24-11-11.
 //
-#include <PointerToImpl.h>
+#include <tbs/PointerToImpl.h>
 #include <concurrency/sync_point/SyncPoint.h>
 #include <iostream>
 #include <log/log_macro.h>
 #include <log/loggers/BuiltInLogger.h>
-#include <match/match_macro.h>
-#include <threads/ThreadPool.h>
-#include <time_utils.hpp>
+#include <tbs/match/match_macro.h>
+#include <tbs/threads/ThreadPool.h>
+#include <tbs/time_utils.hpp>
 using namespace tbs::threads;
 
 auto logger = BuiltInLoggers::ConsoleLogger("main");
@@ -51,6 +51,8 @@ int main(int argc, char* argv[])
                                            break;
                                        case event_info::CANCELED:
                                            LOG_INFO("canceled at {}", ei->current_thread);
+                                           break;
+                                       default:
                                            break;
                                        }
                                    }});

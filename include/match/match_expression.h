@@ -5,8 +5,8 @@
 #ifndef TBS_TOOL_LIB_INCLUDE_MATCH_MATCH_EXPRESSION_H
 #define TBS_TOOL_LIB_INCLUDE_MATCH_MATCH_EXPRESSION_H
 
-#include <type_check.h>
-#include <match/expressions/RelationExpressions.h>
+#include <tbs/type_check.h>
+#include <tbs/match/expressions/RelationExpressions.h>
 
 /**
  * @brief 任意匹配表达式类

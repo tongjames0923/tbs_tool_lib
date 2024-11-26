@@ -5,8 +5,8 @@
 #ifndef TBS_TOOL_LIB_INCLUDE_MATCH_MATCHER_H
 #define TBS_TOOL_LIB_INCLUDE_MATCH_MATCHER_H
 
-#include <defs.h>
-#include <type_check.h>
+#include <tbs/defs.h>
+#include <tbs/type_check.h>
 
 /**
  * @brief Matcher类模板

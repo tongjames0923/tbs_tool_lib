@@ -4,7 +4,7 @@
 
 #ifndef THREADPOOL_H
 #define THREADPOOL_H
-#include <PointerToImpl.h>
+#include <tbs/PointerToImpl.h>
 #include <functional>
 namespace tbs::threads
 {

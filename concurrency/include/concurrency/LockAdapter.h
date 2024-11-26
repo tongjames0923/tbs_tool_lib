@@ -4,8 +4,8 @@
 
 #ifndef TBS_TOOL_LIB_CONCURRENCY_INCLUDE_CONCURRENCY_LOCKADAPTER_H
 #define TBS_TOOL_LIB_CONCURRENCY_INCLUDE_CONCURRENCY_LOCKADAPTER_H
-#include <defs.h>
-#include <guard.h>
+#include <tbs/defs.h>
+#include <tbs/guard.h>
 #include <unordered_map>
 
 namespace tbs::concurrency

@@ -7,13 +7,13 @@
 
 #include <atomic>
 #include <condition_variable>
-#include <defs.h>
+#include <tbs/defs.h>
 #include <functional>
 #include <queue>
-#include <time_utils.hpp>
+#include <tbs/time_utils.hpp>
 #include <utility>
 
-#include "PointerToImpl.h"
+#include <tbs/PointerToImpl.h>
 /**
  * 命名空间 tbs::concurrency::sync_point 用于同步点机制，提供线程同步的工具类。
  */

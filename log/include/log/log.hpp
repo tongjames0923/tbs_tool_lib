@@ -5,7 +5,7 @@
 #define TBS_CPP_LOG_HPP
 
 #include <format>
-#include <defs.h>
+#include <tbs/defs.h>
 #include <vector>
 
 enum LogLevel {

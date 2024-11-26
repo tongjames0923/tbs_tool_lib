@@ -7,7 +7,7 @@ SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/runtime)
 SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/lib)
 SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/runtime)
 SET(SOURCE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/impls)
-SET(PROJECT_HEAD  ${CMAKE_SOURCE_DIR}/bin/include ${CMAKE_CURRENT_SOURCE_DIR}/include)
+SET(PROJECT_HEAD ${CMAKE_CURRENT_SOURCE_DIR}/include)
 SET(INLS_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/include/inls)
 
 
@@ -21,8 +21,9 @@ IF (WIN32)
     SET(LIB_PATH ${CMAKE_SOURCE_DIR}/bin/lib "C:\\msys64\\mingw64\\lib")
 ELSEIF (APPLE)
     MESSAGE(STATUS "APPLE PLATFORM")
-    SET(HEADER_PATH /opt/homebrew/include /opt/homebrew/opt/llvm@17/include)
-    SET(LIB_PATH ${CMAKE_SOURCE_DIR}/bin/lib /opt/homebrew/lib /opt/homebrew/opt/llvm@17/lib/c++)
+    set(CMAKE_INSTALL_PREFIX "/opt/homebrew/")
+    SET(HEADER_PATH ${CMAKE_INSTALL_PREFIX}/include)
+    SET(LIB_PATH ${CMAKE_INSTALL_PREFIX}/lib)
     SET(CMAKE_OSX_SYSROOT /Library/Developer/CommandLineTools/SDKs/MacOSX12.1.sdk)
 ENDIF ()
 
@@ -56,7 +57,7 @@ ELSE ()
     target_include_directories(tbs_tool_concurrency PUBLIC ${HEADER_PATH} ${PROJECT_HEAD} ${INLS_SOURCE})
 ENDIF ()
 # 安装库文件
-install(TARGETS tbs_tool_concurrency DESTINATION ${CMAKE_SOURCE_DIR}/bin/lib)
+install(TARGETS tbs_tool_concurrency DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 
 # 安装头文件
-install(DIRECTORY include/ DESTINATION ${CMAKE_SOURCE_DIR}/bin/include)
+install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_PREFIX}/include/tbs/)
