@@ -1,6 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.27.8)
 PROJECT(tbs_tool_lib VERSION 0.1.0 LANGUAGES C CXX)
 
+message(STATUS "tbs tool lib build")
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_CXX_STANDARD 20)
 SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/runtime)
@@ -25,14 +26,13 @@ ELSEIF (APPLE)
     SET(LIB_PATH ${CMAKE_INSTALL_PREFIX}/lib)
     SET(CMAKE_OSX_SYSROOT /Library/Developer/CommandLineTools/SDKs/MacOSX12.1.sdk)
 ENDIF ()
-
+# 添加子目录
 add_subdirectory(base)
 add_subdirectory(log)
-
-
 add_subdirectory(concurrency)
 add_subdirectory(tester)
-LINK_DIRECTORIES(BEFORE ${LIB_PATH})
+
+# 搜索源文件和头文件
 MESSAGE(STATUS "searching for sources...")
 FILE(GLOB_RECURSE SOURCES ${SOURCE_PATH}/**.cpp ${SOURCE_PATH}/**.c)
 FOREACH (ITEM IN LISTS SOURCES)
@@ -51,16 +51,20 @@ FOREACH (ITEM IN LISTS HEADER_INLS)
     MESSAGE(STATUS "head inls file: ${ITEM}")
 ENDFOREACH ()
 
-
+# 根据选项构建静态或动态库
 IF (CMAKE_LIB_BUILD_STATIC)
     MESSAGE(STATUS "static lib build")
     ADD_LIBRARY(tbs_tool_lib STATIC ${HEADERS} ${HEADER_INLS} ${SOURCES})
-    target_include_directories(tbs_tool_lib PUBLIC ${HEADER_PATH} ${PROJECT_HEAD} ${INLS_SOURCE})
 ELSE ()
     MESSAGE(STATUS "dynamic lib build")
     ADD_LIBRARY(tbs_tool_lib SHARED ${HEADERS} ${HEADER_INLS} ${SOURCES})
-    target_include_directories(tbs_tool_lib PUBLIC ${HEADER_PATH} ${PROJECT_HEAD} ${INLS_SOURCE})
 ENDIF ()
+
+# 设置包含目录
+target_include_directories(tbs_tool_lib PUBLIC ${HEADER_PATH} ${PROJECT_HEAD} ${INLS_SOURCE})
+
+# 添加依赖关系
+add_dependencies(tbs_tool_lib tbs_tool_base tbs_log tbs_tool_concurrency)
 
 # 安装库文件
 install(TARGETS tbs_tool_lib DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)

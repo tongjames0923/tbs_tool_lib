@@ -1,6 +1,6 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.27.8)
 PROJECT(tbs_tool_base VERSION 0.1.0 LANGUAGES C CXX)
-
+message(STATUS "tbs_tool_base build")
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_CXX_STANDARD 20)
 SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/runtime)
@@ -49,13 +49,14 @@ ENDFOREACH ()
 IF (CMAKE_LIB_BUILD_STATIC)
     MESSAGE(STATUS "static lib build")
     ADD_LIBRARY(tbs_tool_base STATIC ${HEADERS} ${HEADER_INLS} ${SOURCES})
-    target_include_directories(tbs_tool_base PUBLIC ${HEADER_PATH} ${PROJECT_HEAD} ${INLS_SOURCE})
+
 
 ELSE ()
     MESSAGE(STATUS "dynamic lib build")
     ADD_LIBRARY(tbs_tool_base SHARED ${HEADERS} ${HEADER_INLS} ${SOURCES})
-    target_include_directories(tbs_tool_base PUBLIC ${HEADER_PATH} ${PROJECT_HEAD} ${INLS_SOURCE})
+
 ENDIF ()
+target_include_directories(tbs_tool_base PUBLIC ${HEADER_PATH} ${PROJECT_HEAD} ${INLS_SOURCE})
 # 安装库文件
 install(TARGETS tbs_tool_base DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 

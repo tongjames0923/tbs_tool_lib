@@ -1,6 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.27.8)
 PROJECT(tbs_log VERSION 0.1.0 LANGUAGES C CXX)
 
+message(STATUS "tbs log build")
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_CXX_STANDARD 20)
 SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/runtime)
@@ -26,8 +27,6 @@ ELSEIF (APPLE)
     SET(CMAKE_OSX_SYSROOT /Library/Developer/CommandLineTools/SDKs/MacOSX12.1.sdk)
 ENDIF ()
 
-
-
 LINK_DIRECTORIES(BEFORE ${LIB_PATH})
 MESSAGE(STATUS "searching for sources...")
 FILE(GLOB_RECURSE SOURCES ${SOURCE_PATH}/**.cpp ${SOURCE_PATH}/**.c)
@@ -50,13 +49,14 @@ ENDFOREACH ()
 IF (CMAKE_LIB_BUILD_STATIC)
     MESSAGE(STATUS "static lib build")
     ADD_LIBRARY(tbs_log STATIC ${HEADERS} ${HEADER_INLS} ${SOURCES})
-    target_include_directories(tbs_log PUBLIC ${HEADER_PATH} ${PROJECT_HEAD} ${INLS_SOURCE})
 
 ELSE ()
     MESSAGE(STATUS "dynamic lib build")
     ADD_LIBRARY(tbs_log SHARED ${HEADERS} ${HEADER_INLS} ${SOURCES})
-    target_include_directories(tbs_log PUBLIC ${HEADER_PATH} ${PROJECT_HEAD} ${INLS_SOURCE})
+
 ENDIF ()
+target_include_directories(tbs_log PUBLIC ${HEADER_PATH} ${PROJECT_HEAD} ${INLS_SOURCE})
+add_dependencies(tbs_log tbs_tool_base)
 # 安装库文件
 install(TARGETS tbs_log DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 
