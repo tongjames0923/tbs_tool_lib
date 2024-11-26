@@ -4,8 +4,8 @@
 
 #ifndef THREADPOOL_H
 #define THREADPOOL_H
-#include <tbs/PointerToImpl.h>
 #include <functional>
+#include <tbs/PointerToImpl.h>
 namespace tbs::threads
 {
 
@@ -51,8 +51,10 @@ namespace tbs::threads
         size_t threadCount;
         size_t maxTaskCount;
         bool running;
-        exception_handler handler = nullptr;
+        exception_handler exceptionHandler = nullptr;
         thread_pool_event_handler eventHandler = nullptr;
+        size_t maxIdleThreadCount = threadCount;
+        size_t maxIdleTime = 5000;
     };
 
     struct ThreadTask
@@ -66,7 +68,6 @@ namespace tbs::threads
         {
             return priority >= __y.priority;
         }
-
     };
 
     class ThreadPoolImpl;
@@ -74,12 +75,21 @@ namespace tbs::threads
     class ThreadPool final : public virtual PointerImpl<ThreadPoolImpl>
     {
     public:
-        explicit ThreadPool(const ThreadPoolData& config);
+        explicit ThreadPool(CONST char* threadPoolName = "default",
+                            size_t threadCount = 2,
+                            size_t maxTaskCount = 32,
+                            size_t maxIdleThreadCount = 2,
+                            size_t maxIdleTime = 5000,
+                            exception_handler exceptionHandler = nullptr,
+                            thread_pool_event_handler eventHandler = nullptr);
 
         DEFAULT_DESTRUCTION(ThreadPool);
 
         DELETE_COPY_ASSIGNMENT(ThreadPool);
         DELETE_COPY_CONSTRUCTION(ThreadPool);
+
+        DEFAULT_MOVE_ASSIGNMENT(ThreadPool);
+        DEFAULT_MOVE_CONSTRUCTION(ThreadPool);
         /**
          * 停止线程池
          */
@@ -103,6 +113,10 @@ namespace tbs::threads
          * @return 线程池是否正在运行
          */
         bool isRunning() CONST;
+
+        CONST ThreadPoolData& getConfig() CONST;
+
+        ThreadPoolData& getConfig();
     };
 } // namespace tbs::threads
 

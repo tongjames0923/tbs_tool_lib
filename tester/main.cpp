@@ -1,9 +1,9 @@
 //
 // Created by abstergo on 24-11-11.
 //
-#include <tbs/concurrency/sync_point/SyncPoint.h>
 #include <iostream>
 #include <tbs/PointerToImpl.h>
+#include <tbs/concurrency/sync_point/SyncPoint.h>
 #include <tbs/log/log.hpp>
 #include <tbs/log/loggers/BuiltInLogger.h>
 #include <tbs/threads/ThreadPool.h>
@@ -21,40 +21,45 @@ int main(int argc, char* argv[])
 {
     using namespace tbs::concurrency::sync_point;
     SyncPoint sp;
-    ThreadPool pool(ThreadPoolData{"mainTask",
-                                   8,
-                                   8,
-                                   false,
-                                   [&sp](error_info* a, auto b, auto c, auto d)
-                                   {
-                                       sp.accumulateFlag(1);
-                                       LOG_ERROR("error: {}", a->exception->what());
-                                   },
-                                   [](event_info* ei, ThreadPoolData* config, ThreadPool* pool)
-                                   {
-                                       switch (ei->signal)
-                                       {
-                                       case event_info::WAITTING:
-                                           LOG_INFO("waiting at {}", ei->current_thread);
-                                           break;
-                                       case event_info::PICKED:
-                                           LOG_INFO("picked at {}", ei->current_thread);
-                                           break;
-                                       case event_info::RUNNING:
-                                           LOG_INFO("running at {}", ei->current_thread);
-                                           break;
-                                       case event_info::FINISHED:
-                                           LOG_INFO("finished at {}", ei->current_thread);
-                                           break;
-                                       case event_info::CANCELED:
-                                           LOG_INFO("canceled at {}", ei->current_thread);
-                                           break;
-                                       default:
-                                           break;
-                                       }
-                                   }});
+    ThreadPool pool(
+        "pool",
+        8,
+        16,
+        2,
+        1000,
+        [&sp](error_info* a, auto b, auto c, auto d)
+        {
+            sp.accumulateFlag(1);
+            LOG_ERROR("error: {}", a->exception->what());
+        },
+        [](event_info* ei, ThreadPoolData* config, ThreadPool* pool)
+        {
+            switch (ei->signal)
+            {
+            case event_info::WAITTING:
+                LOG_INFO("waiting at {}", ei->current_thread);
+                break;
+            case event_info::PICKED:
+                LOG_INFO("picked at {}", ei->current_thread);
+                break;
+            case event_info::RUNNING:
+                LOG_INFO("running at {}", ei->current_thread);
+                break;
+            case event_info::FINISHED:
+                LOG_INFO("finished at {}", ei->current_thread);
+                break;
+            case event_info::CANCELED:
+                LOG_INFO("canceled at {}", ei->current_thread);
+                break;
+            default:
+                break;
+            }
+        });
     pool.start();
-
+    auto& pc = pool.getConfig();
+    LOG_INFO("thread count: {}", pc.threadCount);
+    LOG_INFO("max task count: {}", pc.maxTaskCount);
+    LOG_INFO("thread pool name: {}", pc.threadPoolName);
     for (int i = 0; i < TASK; i++)
     {
         pool.submit([&sp]() { sp.accumulateFlag(1); });

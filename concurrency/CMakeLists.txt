@@ -10,9 +10,9 @@ SET(SOURCE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/impls)
 SET(PROJECT_HEAD ${CMAKE_CURRENT_SOURCE_DIR}/include)
 SET(INLS_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/include/inls)
 
-
 OPTION(CMAKE_LIB_BUILD_STATIC "库文件是否为静态，否为动态库" ON)
 
+set(LOG_LEVEL 0)
 
 IF (WIN32)
     MESSAGE(STATUS "WINDOWS PLATFORM")
@@ -56,6 +56,7 @@ ELSE ()
 
 ENDIF ()
 target_include_directories(tbs_tool_concurrency PRIVATE ${HEADER_PATH} ${PROJECT_HEAD} ${INLS_SOURCE})
+target_compile_definitions(tbs_tool_concurrency PRIVATE LOG_LEVEL=${LOG_LEVEL})
 add_dependencies(tbs_tool_concurrency tbs_tool_base tbs_log)
 # 安装库文件
 install(TARGETS tbs_tool_concurrency DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
