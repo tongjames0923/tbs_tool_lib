@@ -65,29 +65,52 @@ namespace tbs::concurrency::containers
         }
 
         /**
+         * @brief 从队列中获取并移除一个元素，等待指定时间。
+         *
+         * @param timeout 等待超时时间。
+         * @return 获取到的元素，如果超时则返回空。
+         */
+        std::optional<T> poll(CONST time_utils::ms& timeout)
+        {
+            std::optional<T> ret;
+            m_syncPoint.wait_flag(1,
+                                  timeout,
+                                  [&](CONST sync_point::SyncPoint& s, bool a, bool b, bool c, CONST int& t)
+                                  {
+                                      if (c) // 旗帜被设置，说明有元素被添加或移除，唤醒等待线程
+                                      {
+                                          Base::writeAsAtomic(
+                                              [&](auto& q)
+                                              {
+                                                  if (!q.empty())
+                                                  {
+                                                      ret = q.top(); // 获取队列顶部元素
+                                                      q.pop(); // 移除队列顶部元素
+                                                  }
+                                              });
+                                      }
+                                  });
+            m_syncPoint.accumulateFlag(-1); // 更新同步标志
+            return ret;
+        }
+
+
+        /**
          * @brief 获取并移除队列顶部的元素。
          *
-         * @return 队列顶部的元素，如果队列为空则返回 std::nullopt。
+         * @return 队列顶部的元素，如果队列为空则返回
          */
         T poll()
         {
             std::optional<T> ret;
-            m_syncPoint.wait_flag(1,
-                                  [&](CONST sync_point::SyncPoint& s, bool a, bool b, bool c, CONST int& t)
-                                  {
-                                      Base::writeAsAtomic(
-                                          [&](auto& q)
-                                          {
-                                              if (!q.empty())
-                                              {
-                                                  ret = q.top(); // 获取队列顶部元素
-                                                  q.pop(); // 移除队列顶部元素
-                                              }
-                                          });
-                                  });
-            m_syncPoint.accumulateFlag(-1); // 更新同步标志
+            do
+            {
+                ret = std::move(poll(time_utils::ms(2000)));
+            }
+            while (!ret.has_value());
             return ret.value();
         }
+
 
         /**
          * @brief 获取队列顶部的元素（常量版本）。
