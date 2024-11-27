@@ -26,11 +26,15 @@ ELSEIF (APPLE)
 ENDIF ()
 SET(HEADER_PATH ${CMAKE_INSTALL_PREFIX}/include)
 SET(LIB_PATH ${CMAKE_INSTALL_PREFIX}/lib)
+set(BUILD_TESTER ON CACHE BOOL "构建测试器")
+
 # 添加子目录
 add_subdirectory(base)
 add_subdirectory(log)
 add_subdirectory(concurrency)
-add_subdirectory(tester)
+if (${BUILD_TESTER})
+    add_subdirectory(tester)
+endif ()
 
 # 搜索源文件和头文件
 MESSAGE(STATUS "searching for sources...")
@@ -61,7 +65,7 @@ ELSE ()
 ENDIF ()
 
 # 设置包含目录
-target_include_directories(tbs_tool_lib PUBLIC ${HEADER_PATH} ${PROJECT_HEAD} ${INLS_SOURCE})
+target_include_directories(tbs_tool_lib PRIVATE ${HEADER_PATH} ${PROJECT_HEAD} ${INLS_SOURCE})
 
 ## 添加依赖关系
 #add_dependencies(tbs_tool_lib tbs_tool_base tbs_log tbs_tool_concurrency)
