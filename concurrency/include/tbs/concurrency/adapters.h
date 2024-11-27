@@ -5,10 +5,12 @@
 #ifndef TBS_TOOL_LIB_CONCURRENCY_INCLUDE_CONCURRENCY_ADAPTERS_H
 #define TBS_TOOL_LIB_CONCURRENCY_INCLUDE_CONCURRENCY_ADAPTERS_H
 
-#include <concurrency/LockAdapter.h>
-#include <concurrency/ParameterableLockAdapter.h>
-#include <concurrency/lock_operators/operators.h>
 #include <shared_mutex>
+#include <tbs/concurrency/LockAdapter.h>
+#include <tbs/concurrency/ParameterableLockAdapter.h>
+#include <tbs/concurrency/lock_operators/operators.h>
+
+#include <tbs/concurrency/lock_operators/MappedSharedLockOperator.h>
 
 /**
  * @brief 定义互斥锁的适配器类型，提供唯一的锁操作接口。

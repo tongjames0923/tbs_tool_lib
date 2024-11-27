@@ -2,7 +2,7 @@
 // Created by abstergo on 24-11-21.
 //
 
-#include <threads/ThreadPool.h>
+#include <tbs/threads/ThreadPool.h>
 
 #include <utility>
 #include "ThreadPoolImpl_impls.cpp"

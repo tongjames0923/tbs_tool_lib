@@ -4,7 +4,7 @@
 
 #ifndef SHAREDLOCKADAPTER_H
 #define SHAREDLOCKADAPTER_H
-#include <concurrency/LockAdapter.h>
+#include <tbs/concurrency/LockAdapter.h>
 
 namespace tbs::concurrency
 {

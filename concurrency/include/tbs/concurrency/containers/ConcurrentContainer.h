@@ -5,8 +5,8 @@
 #ifndef CONCURRENTCONTAINER_H
 #define CONCURRENTCONTAINER_H
 
-#include <concurrency/adapters.h>
-#include <concurrency/sync_point/SyncPoint.h>
+#include <tbs/concurrency/adapters.h>
+#include <tbs/concurrency/sync_point/SyncPoint.h>
 
 /**
  * @brief 命名空间 tbs::concurrency::container 包含并发容器类

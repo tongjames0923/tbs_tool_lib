@@ -5,10 +5,9 @@
 #ifndef CONCURRENTPRIORTYQUEUE_H
 #define CONCURRENTPRIORTYQUEUE_H
 
-#include <concurrency/LockAdapter.h>
-#include <concurrency/adapters.h>
-#include <concurrency/containers/ConcurrentContainer.h>
-#include <concurrency/sync_point/SyncPoint.h>
+#include <tbs/concurrency/adapters.h>
+#include <tbs/concurrency/containers/ConcurrentContainer.h>
+#include <tbs/concurrency/sync_point/SyncPoint.h>
 #include <optional>
 #include <queue>
 

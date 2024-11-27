@@ -6,7 +6,7 @@
 #define TBS_TOOL_LIB_BASE_INCLUDE_STRING_UTILS_H_
 
 #include <string>
-#include <tbs/defs.h>
+#include "defs.h"
 
 /**
  * 检查给定的C风格字符串是否为空

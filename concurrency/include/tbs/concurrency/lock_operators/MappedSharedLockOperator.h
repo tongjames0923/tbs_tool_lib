@@ -4,7 +4,7 @@
 
 #ifndef MAPPEDSHAREDLOCKOPERATOR_H
 #define MAPPEDSHAREDLOCKOPERATOR_H
-#include <concurrency/ParameterableLockAdapter.h>
+#include <tbs/concurrency/ParameterableLockAdapter.h>
 #include <shared_mutex>
 #include <thread>
 #include <unordered_map>

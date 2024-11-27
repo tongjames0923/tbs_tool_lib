@@ -1,4 +1,4 @@
-#include <concurrency/sync_point/SyncPoint.h>
+#include <tbs/concurrency/sync_point/SyncPoint.h>
 
 #include <cstddef>
 #include "SyncPointImpl_impls.cpp"

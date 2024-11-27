@@ -5,8 +5,8 @@
 #ifndef TBS_TOOL_LIB_CONCURRENCY_INCLUDE_CONCURRENCY_LOCK_OPERATORS_OPERATORS_H
 #define TBS_TOOL_LIB_CONCURRENCY_INCLUDE_CONCURRENCY_LOCK_OPERATORS_OPERATORS_H
 
-#include <concurrency/lock_operators/MappedLockOperator.h>
-#include <concurrency/lock_operators/MappedSharedLockOperator.h>
+#include <tbs/concurrency/lock_operators/MappedLockOperator.h>
+#include <tbs/concurrency/lock_operators/MappedSharedLockOperator.h>
 
 // 定义用于操作普通互斥锁的别名
 using MutexLockOpeartor = MappedLockOperator<std::mutex>;

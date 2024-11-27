@@ -17,15 +17,15 @@ OPTION(CMAKE_LIB_BUILD_STATIC "库文件是否为静态，否为动态库" ON)
 IF (WIN32)
     MESSAGE(STATUS "WINDOWS PLATFORM")
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
-    SET(HEADER_PATH "C:\\msys64\\mingw64\\include")
-    SET(LIB_PATH ${CMAKE_SOURCE_DIR}/bin/lib "C:\\msys64\\mingw64\\lib")
+    set(CMAKE_INSTALL_PREFIX "C:/msys64/mingw64")
 ELSEIF (APPLE)
     MESSAGE(STATUS "APPLE PLATFORM")
     set(CMAKE_INSTALL_PREFIX "/opt/homebrew/")
-    SET(HEADER_PATH ${CMAKE_INSTALL_PREFIX}/include)
-    SET(LIB_PATH ${CMAKE_INSTALL_PREFIX}/lib)
+
     SET(CMAKE_OSX_SYSROOT /Library/Developer/CommandLineTools/SDKs/MacOSX12.1.sdk)
 ENDIF ()
+SET(HEADER_PATH ${CMAKE_INSTALL_PREFIX}/include)
+SET(LIB_PATH ${CMAKE_INSTALL_PREFIX}/lib)
 # 添加子目录
 add_subdirectory(base)
 add_subdirectory(log)
@@ -64,10 +64,10 @@ ENDIF ()
 target_include_directories(tbs_tool_lib PUBLIC ${HEADER_PATH} ${PROJECT_HEAD} ${INLS_SOURCE})
 
 ## 添加依赖关系
-add_dependencies(tbs_tool_lib tbs_tool_base tbs_log tbs_tool_concurrency)
+#add_dependencies(tbs_tool_lib tbs_tool_base tbs_log tbs_tool_concurrency)
 
 # 安装库文件
 install(TARGETS tbs_tool_lib DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 
 # 安装头文件
-install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_PREFIX}/include/tbs)
+install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_PREFIX}/include)

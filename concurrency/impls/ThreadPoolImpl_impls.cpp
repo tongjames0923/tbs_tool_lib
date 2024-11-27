@@ -5,10 +5,10 @@
 
 #ifndef THREADPOOL_THREADPOOLIMPL_IMPLS_H
 #define THREADPOOL_THREADPOOLIMPL_IMPLS_H
-#include <concurrency/adapters.h>
-#include <concurrency/containers/ConcurrentPriorityQueue.h>
+#include <tbs/concurrency/adapters.h>
+#include <tbs/concurrency/containers/ConcurrentPriorityQueue.h>
 #include <tbs/log/loggers/BuiltInLogger.h>
-#include <threads/ThreadPool.h>
+#include <tbs/threads/ThreadPool.h>
 namespace tbs::threads
 {
 

@@ -6,7 +6,7 @@
 #ifndef SYNCPOINTIMPL_H
 #define SYNCPOINTIMPL_H
 #include <atomic>
-#include <concurrency/sync_point/SyncPoint.h>
+#include <tbs/concurrency/sync_point/SyncPoint.h>
 namespace tbs::concurrency::sync_point
 {
     class SyncPointImpl
