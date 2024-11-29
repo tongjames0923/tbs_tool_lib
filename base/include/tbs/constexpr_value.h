@@ -7,22 +7,31 @@
 
 #include <array>
 #include "defs.h"
-// 通用的编译时常量化结构体
+
+/**
+ * 通用的编译时常量化结构体
+ *
+ * @tparam T 元素类型
+ * @tparam N 数组大小
+ */
 template <typename T, size_t N>
 struct ConstexprValue
 {
     std::array<T, N> value;
 
-    // constexpr 构造函数
+    /**
+     * 默认构造函数，初始化为空数组
+     */
     constexpr ConstexprValue() : value{}
     {
     }
 
-    template <typename... Args>
-    constexpr explicit ConstexprValue(Args... args) : value(args...)
-    {
-    }
 
+    /**
+     * 从指针初始化数组
+     *
+     * @param ptr 指向初始值的指针
+     */
     constexpr explicit ConstexprValue(CONST T* ptr) : value()
     {
         for (size_t i = 0; i < N; ++i)
@@ -30,6 +39,13 @@ struct ConstexprValue
             value[i] = ptr[i];
         }
     }
+
+    /**
+     * 比较两个 ConstexprValue 是否相等
+     *
+     * @param other 要比较的对象
+     * @return 如果相等返回 true，否则返回 false
+     */
     template <typename U, size_t C>
     constexpr bool operator==(const ConstexprValue<U, C>& other) const
     {
@@ -44,65 +60,116 @@ struct ConstexprValue
         return true;
     }
 
-    // constexpr 成员函数，返回值
+    /**
+     * 获取数组中的元素
+     *
+     * @param index 元素索引，默认为 0
+     * @return 引用数组中的元素
+     */
     constexpr T& get(size_t index = 0)
     {
         return value[index];
     }
 
-    // constexpr 成员函数，返回值（常量版本）
+    /**
+     * 获取数组中的元素（常量版本）
+     *
+     * @param index 元素索引，默认为 0
+     * @return 常量引用数组中的元素
+     */
     constexpr const T& get(size_t index = 0) const
     {
         return value[index];
     }
 
-    // constexpr 成员函数，返回数组大小
+    /**
+     * 返回数组的大小
+     *
+     * @return 数组的大小
+     */
     [[nodiscard]] constexpr size_t size() const
     {
         return N;
     }
 };
 
+/**
+ * 专门用于单个元素的 ConstexprValue 结构体
+ *
+ * @tparam T 元素类型
+ */
 template <typename T>
 struct ConstexprValue<T, 1>
 {
     T value;
-    // 默认构造函数，用于创建一个空的数组
+
+    /**
+     * 默认构造函数，初始化为空值
+     */
     constexpr ConstexprValue() : value{}
     {
     }
 
-    // 构造函数，用于创建一个包含指定值的数组
+    /**
+     * 带参数的构造函数，初始化单个元素
+     *
+     * @param args 可变参数列表，用于初始化单个元素
+     */
     template <typename... Args>
     constexpr explicit ConstexprValue(Args... args) : value(args...)
     {
     }
 
+    /**
+     * 比较两个 ConstexprValue 是否相等
+     *
+     * @param other 要比较的对象
+     * @return 如果相等返回 true，否则返回 false
+     */
     template <typename U>
     constexpr bool operator==(const ConstexprValue<U, 1>& other) const
     {
         return value == other.value;
     }
-    // 获取数组中的元素，始终返回默认值
+
+    /**
+     * 获取单个元素
+     *
+     * @return 引用单个元素
+     */
     constexpr T& get()
     {
         return value;
     }
+
+    /**
+     * 获取单个元素（常量版本）
+     *
+     * @return 常量引用单个元素
+     */
     [[nodiscard]] constexpr const T& get() const
     {
         return value;
     }
 };
 
-
-// 特化字符串类型
+/**
+ * 专门用于字符数组的 ConstexprValue 结构体
+ *
+ * @tparam N 字符数组的大小
+ */
 template <size_t N>
 struct ConstexprValue<char, N>
 {
     std::array<char, N> value;
     size_t length;
 
-
+    /**
+     * 比较两个 ConstexprValue 是否相等
+     *
+     * @param other 要比较的对象
+     * @return 如果相等返回 true，否则返回 false
+     */
     template <typename U, size_t C>
     constexpr bool operator==(const ConstexprValue<U, C>& other) const
     {
@@ -116,7 +183,12 @@ struct ConstexprValue<char, N>
         }
         return true;
     }
-    // constexpr 构造函数
+
+    /**
+     * 从 C 风格字符串初始化字符数组
+     *
+     * @param str C 风格字符串
+     */
     constexpr explicit ConstexprValue(const char* str) : length(0)
     {
         while (str[length] != '\0' && length < N - 1)
@@ -127,40 +199,68 @@ struct ConstexprValue<char, N>
         value[length] = '\0'; // 确保字符串以 null 终止
     }
 
-    // constexpr 成员函数，返回字符串长度
+    /**
+     * 返回字符串的长度
+     *
+     * @return 字符串的长度
+     */
     [[nodiscard]] constexpr size_t size() const
     {
         return length;
     }
 
-    // constexpr 成员函数，返回字符串的 C 风格表示
+    /**
+     * 返回字符串的 C 风格表示
+     *
+     * @return 字符串的 C 风格表示
+     */
     [[nodiscard]] constexpr const char* c_str() const
     {
         return value.data();
     }
 
-    // constexpr 成员函数，返回指定位置的字符
+    /**
+     * 获取指定位置的字符
+     *
+     * @param index 字符索引
+     * @return 指定位置的字符，如果索引超出范围则返回 '\0'
+     */
     constexpr char operator[](size_t index) const
     {
         return (index < length) ? value[index] : '\0';
     }
 };
 
+/**
+ * 定义一个常量字符串
+ *
+ * @param name 常量字符串的名称
+ * @param str 字符串字面量
+ */
 #define CONSTEXPR_STRING(name, str) constexpr ConstexprValue<char, sizeof(str)> name(str)
 
-
-// 辅助函数，用于推导数组大小
+/**
+ * 辅助函数，用于从数组创建 ConstexprValue 对象
+ *
+ * @param arr 要转换的数组
+ * @return 创建的 ConstexprValue 对象
+ */
 template <typename T, size_t N>
 constexpr ConstexprValue<T, N> make_ConstexprValue(const T (&arr)[N])
 {
     return ConstexprValue<T, N>{arr};
 }
 
+/**
+ * 辅助函数，用于从单个值创建 ConstexprValue 对象
+ *
+ * @param value 要转换的值
+ * @return 创建的 ConstexprValue 对象
+ */
 template<typename T>
 constexpr ConstexprValue<T,1> make_ConstexprValue(T&& value)
 {
     return ConstexprValue<T,1>{value};
 }
-
 
 #endif //CONSTEXPR_VALUE_H
