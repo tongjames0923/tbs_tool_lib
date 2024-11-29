@@ -63,20 +63,5 @@ std::string format_string(CONST char* fmt, Args&&... args)
     return std::vformat(fmt, std::make_format_args(args...));
 }
 
-/**
- * @brief 编译时常量表达式格式化函数
- *
- * 该函数是一个编译时常量表达式，用于在编译时根据格式化字符串fmt和参数args...生成一个格式化后的字符串。
- *
- * @param fmt 格式化字符串
- * @param args 参数包，包含所有格式化所需参数
- * @return std::string 格式化后的字符串
- */
-template <typename... Args>
-consteval std::string constexpr_format(CONST char* fmt, Args&&... args)
-{
-    return vformat(fmt, std::make_format_args(args...));
-}
-
 
 #endif // FORMAT_H

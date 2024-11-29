@@ -90,4 +90,14 @@ inline void expandArgs(D d, V v, T first, Args... args) {
   expandArgs(d, v, args...);
 }
 
+
+template <typename Func>
+constexpr bool isVoidReturn()
+{
+    return std::is_same_v<decltype(Func{}()), void>;
+}
+
+template <typename Func>
+using InvokeResultType = std::conditional_t<isVoidReturn<Func>(), void*, std::invoke_result_t<Func>>;
+
 #endif //TBS_CPP_TYPE_CHECK_H
