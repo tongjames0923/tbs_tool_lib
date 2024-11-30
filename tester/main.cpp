@@ -9,7 +9,7 @@
 int main()
 {
     using namespace std;
-    constexpr auto i = COMPILE_TIME_IF(make_ConstexprValue({1, 2, 3, 4}) == make_ConstexprValue({1, 2, 5, 4}), []() { return; }, []() { return 68; });
+    constexpr auto i = COMPILE_TIME_IF_RESULT(make_ConstexprValue({1, 2, 3, 4}) == make_ConstexprValue({1, 2, 5, 4}), []() { return; }, []() { return 68; });
     if constexpr (i.has_value())
     {
         cout << i.value() << endl;
