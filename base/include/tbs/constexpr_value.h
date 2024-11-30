@@ -26,7 +26,6 @@ struct ConstexprValue
     {
     }
 
-
     /**
      * 从指针初始化数组
      *
@@ -173,7 +172,6 @@ struct ConstexprValue<char, N>
     template <typename U, size_t C>
     constexpr bool operator==(const ConstexprValue<U, C>& other) const
     {
-        static_assert(N == C, "ConstexprValue size mismatch");
         for (size_t i = 0; i < N; ++i)
         {
             if (value[i] != other.value[i])
@@ -189,14 +187,63 @@ struct ConstexprValue<char, N>
      *
      * @param str C 风格字符串
      */
-    constexpr explicit ConstexprValue(const char* str) : length(0)
+    constexpr explicit ConstexprValue(const char* str) : length(0), value{}
     {
-        while (str[length] != '\0' && length < N - 1)
+        while (str[length] != '\0' && length <= N - 1)
         {
             value[length] = str[length];
             ++length;
         }
         value[length] = '\0'; // 确保字符串以 null 终止
+    }
+
+    template <size_t N1>
+    explicit constexpr ConstexprValue(CONST ConstexprValue<char, N1>& other) : length(0), value{}
+    {
+        auto str = other.c_str();
+        while (*str != '\0')
+        {
+            value[length] = *str;
+            ++length;
+            ++str;
+        }
+        value[length] = '\0';
+    }
+    template <size_t N1>
+    constexpr ConstexprValue<char, N1> operator=(CONST ConstexprValue<char, N1>& other) CONST
+    {
+        ConstexprValue<char, N1> result("");
+        auto str = other.c_str();
+        while (*str != '\0')
+        {
+            result.value[result.length] = *str;
+            ++(result.length);
+            ++str;
+        }
+        result.value[result.length] = '\0';
+        return result;
+    }
+
+    template <size_t N1>
+    constexpr ConstexprValue<char, N + N1> operator+(CONST ConstexprValue<char, N1>& other) const
+    {
+        ConstexprValue<char, N + N1> result("");
+        auto ptr = this->c_str();
+        while (*ptr != '\0')
+        {
+            result.value[result.length] = *ptr;
+            ++(result.length);
+            ++ptr;
+        }
+        ptr = other.c_str();
+        while (*ptr != '\0')
+        {
+            result.value[result.length] = *ptr;
+            ++(result.length);
+            ++ptr;
+        }
+        result.value[result.length] = '\0';
+        return result;
     }
 
     /**
@@ -232,12 +279,27 @@ struct ConstexprValue<char, N>
 };
 
 /**
+ * 常量字符串结构体，继承自 ConstexprValue
+ *
+ * @tparam N 字符串的长度
+ */
+
+template <size_t N>
+using ConstexprString = ConstexprValue<char, N>;
+/**
  * 定义一个常量字符串
  *
  * @param name 常量字符串的名称
  * @param str 字符串字面量
  */
-#define CONSTEXPR_STRING(name, str) constexpr ConstexprValue<char, sizeof(str)> name(str)
+#define CONSTEXPR_STRING_NAMED(name, str) ConstexprString<sizeof(str)> name(str)
+
+/**
+ * 定义一个常量字符串
+ *
+ * @param str 字符串字面量
+ */
+#define CONSTEXPR_STRING(str) CONSTEXPR_STRING_NAMED(, str)
 
 /**
  * 辅助函数，用于从数组创建 ConstexprValue 对象
