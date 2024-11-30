@@ -35,7 +35,10 @@ namespace tbs::threads
     public:
         ThreadPoolImpl(CONST ThreadPoolData& config, ThreadPool* pool) : _config{config}, _pool{pool}
         {
-            _tasks.resize(config.threadCount);
+            for (size_t i = 0; i < _config.threadCount; i++)
+            {
+                _tasks.push_back(std::move(tbs::concurrency::containers::ConcurrentPriorityQueue<ThreadTask>()));
+            }
         }
         CONST ThreadPoolData& config() CONST
         {

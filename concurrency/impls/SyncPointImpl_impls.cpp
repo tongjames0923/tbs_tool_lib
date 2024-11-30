@@ -33,7 +33,7 @@ namespace tbs::concurrency::sync_point
          */
         std::queue<size_t> _waiting_mutexs;
 
-        explicit SyncPointImpl(const size_t& wait_count) : _wait_count{wait_count}, _mutexs{wait_count + 1}, _conditions{wait_count + 1}
+        explicit SyncPointImpl(const size_t& wait_count = 1) : _wait_count{wait_count}, _mutexs{wait_count + 1}, _conditions{wait_count + 1}
         {
         }
 

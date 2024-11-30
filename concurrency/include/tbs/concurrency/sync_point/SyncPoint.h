@@ -7,9 +7,9 @@
 
 #include <atomic>
 #include <condition_variable>
-#include <tbs/defs.h>
 #include <functional>
 #include <queue>
+#include <tbs/defs.h>
 #include <tbs/time_utils.hpp>
 #include <utility>
 
@@ -49,7 +49,7 @@ namespace tbs::concurrency::sync_point
      * SyncPoint 类用于线程同步，提供多种等待条件和标志的机制。
      *
      */
-    class SyncPoint : public virtual PointerImpl<SyncPointImpl>
+    class SyncPoint : protected virtual PointerImpl<SyncPointImpl>
 
     {
     public:
@@ -164,6 +164,8 @@ namespace tbs::concurrency::sync_point
          * 唤醒所有等待的线程。防止等待睡死
          */
         void wakeup();
+        using PointerImpl::operator=;
+        using PointerImpl::PointerImpl;
 };
 
 };

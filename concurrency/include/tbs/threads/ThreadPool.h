@@ -72,7 +72,7 @@ namespace tbs::threads
 
     class ThreadPoolImpl;
 
-    class ThreadPool final : public virtual PointerImpl<ThreadPoolImpl>
+    class ThreadPool final : protected virtual PointerImpl<ThreadPoolImpl>
     {
     public:
         explicit ThreadPool(CONST char* threadPoolName = "default",

@@ -33,8 +33,7 @@ namespace tbs::threads
                            size_t maxIdleTime,
                            exception_handler exceptionHandler,
                            thread_pool_event_handler eventHandler) :
-        PointerImpl<tbs::threads::ThreadPoolImpl, Resetor>(new ThreadPoolImpl(
-            ThreadPoolData{threadPoolName, threadCount, maxTaskCount, false, std::move(exceptionHandler), std::move(eventHandler), maxIdleThreadCount, maxIdleTime}, this))
+        PointerImpl(ThreadPoolData{threadPoolName, threadCount, maxTaskCount, false, std::move(exceptionHandler), std::move(eventHandler), maxIdleThreadCount, maxIdleTime}, this)
     {
     }
     void ThreadPool::stop()

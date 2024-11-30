@@ -61,6 +61,7 @@ if (DEFINED LOG_LEVEL)
     target_compile_definitions(tbs_tool_concurrency PRIVATE LOG_LEVEL=${LOG_LEVEL})
 endif ()
 add_dependencies(tbs_tool_concurrency tbs_tool_base tbs_log)
+target_link_libraries(tbs_tool_concurrency PRIVATE tbs_tool_base tbs_log )
 # 安装库文件
 install(TARGETS tbs_tool_concurrency DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 
