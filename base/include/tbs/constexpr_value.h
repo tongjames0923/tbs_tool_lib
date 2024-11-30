@@ -152,6 +152,9 @@ struct ConstexprValue<T, 1>
     }
 };
 
+#include <string>
+#include <string_view>
+
 /**
  * 专门用于字符数组的 ConstexprValue 结构体
  *
@@ -197,6 +200,36 @@ struct ConstexprValue<char, N>
         value[length] = '\0'; // 确保字符串以 null 终止
     }
 
+    /**
+     * 从 std::string_view 初始化字符数组
+     *
+     * @param sv std::string_view
+     */
+    constexpr explicit ConstexprValue(std::string_view sv) : length(0), value{}
+    {
+        for (size_t i = 0; i < sv.size() && i < N; ++i)
+        {
+            value[i] = sv[i];
+            ++length;
+        }
+        value[length] = '\0'; // 确保字符串以 null 终止
+    }
+
+    /**
+     * 从 std::string 初始化字符数组
+     *
+     * @param s std::string
+     */
+    constexpr explicit ConstexprValue(const std::string& s) : length(0), value{}
+    {
+        for (size_t i = 0; i < s.size() && i < N; ++i)
+        {
+            value[i] = s[i];
+            ++length;
+        }
+        value[length] = '\0'; // 确保字符串以 null 终止
+    }
+
     template <size_t N1>
     explicit constexpr ConstexprValue(CONST ConstexprValue<char, N1>& other) : length(0), value{}
     {
@@ -209,6 +242,7 @@ struct ConstexprValue<char, N>
         }
         value[length] = '\0';
     }
+
     template <size_t N1>
     constexpr ConstexprValue<char, N1> operator=(CONST ConstexprValue<char, N1>& other) CONST
     {
@@ -276,6 +310,70 @@ struct ConstexprValue<char, N>
     {
         return (index < length) ? value[index] : '\0';
     }
+
+    /**
+     * 转换为 std::string_view
+     *
+     * @return std::string_view
+     */
+    [[nodiscard]] constexpr std::string_view to_string_view() const
+    {
+        return std::string_view(c_str(), length);
+    }
+
+    /**
+     * 转换为 std::string
+     *
+     * @return std::string
+     */
+    [[nodiscard]] constexpr std::string to_string() const
+    {
+        return std::string(c_str(), length);
+    }
+
+    /**
+     * 与 std::string_view 比较
+     *
+     * @param sv std::string_view
+     * @return 如果相等返回 true，否则返回 false
+     */
+    constexpr bool operator==(std::string_view sv) const
+    {
+        if (length != sv.size())
+        {
+            return false;
+        }
+        for (size_t i = 0; i < length; ++i)
+        {
+            if (value[i] != sv[i])
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * 与 std::string 比较
+     *
+     * @param s std::string
+     * @return 如果相等返回 true，否则返回 false
+     */
+    constexpr bool operator==(const std::string& s) const
+    {
+        if (length != s.size())
+        {
+            return false;
+        }
+        for (size_t i = 0; i < length; ++i)
+        {
+            if (value[i] != s[i])
+            {
+                return false;
+            }
+        }
+        return true;
+    }
 };
 
 /**
@@ -286,6 +384,13 @@ struct ConstexprValue<char, N>
 
 template <size_t N>
 using ConstexprString = ConstexprValue<char, N>;
+
+using ConstexprString64 = ConstexprString<64>;
+using ConstexprString128 = ConstexprString<128>;
+using ConstexprString256 = ConstexprString<256>;
+using ConstexprString512 = ConstexprString<512>;
+using ConstexprString1024 = ConstexprString<1024>;
+
 /**
  * 定义一个常量字符串
  *
