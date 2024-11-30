@@ -3,13 +3,13 @@
 #include <memory>
 #include <tbs/defs.h>
 
-    /**
-     * @brief 定义了一个重置函数的类型别名。
-     *
-     * @tparam T 实现类的类型。
-     */
-    template <typename T>
-    using __resetor = void(T*&);
+/**
+ * @brief 定义了一个重置函数的类型别名。
+ *
+ * @tparam T 实现类的类型。
+ */
+template <typename T>
+using __resetor = void(T*&);
 
 /**
  * @brief 默认的重置函数，用于删除指针并将其设置为 nullptr。
@@ -139,7 +139,7 @@ public:
      *
      * @param impl_pointer 指向实现类的指针，默认为 new IMPL()。
      */
-    explicit PointerImpl(IMPL* impl_pointer = new IMPL())
+    explicit PointerImpl(IMPL* impl_pointer = _remake())
     {
         reset(impl_pointer);
     }
