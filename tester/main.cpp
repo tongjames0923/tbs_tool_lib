@@ -9,7 +9,6 @@
 #include <tbs/constexpr_value.h>
 #include <tbs/time_utils.hpp>
 
-#include "../base/include/tbs/constexpr_value.h"
 
 template <typename T, size_t N>
 class FixedQueue
@@ -74,23 +73,53 @@ public:
     }
 };
 
-using DefaultString = ConstexprString64;
+using DefaultString = ConstexprString128;
+// template <size_t N1, size_t N2>
+// static constexpr ConstexprValue<char, N2> zip(CONST ConstexprValue<char, N1>& a, bool& flag)
+// {
+//     if (a.size() > N2)
+//     {
+//         flag = false;
+//         return ConstexprValue<char, N2>("");
+//     }
+//     flag = true;
+//     return ConstexprValue<char, N2>(a.c_str());
+// }
+
+template <size_t N, const ConstexprString<N>& str>
+consteval ConstexprString<sizeOfString(str.c_str()) + 1> _zip()
+{
+    return ConstexprString<sizeOfString(str.c_str()) + 1>(str.c_str());
+}
+
+#define CONSTEXPR_STRING_TYPE(str) ConstexprString<sizeOfString(str)>
+
+
 int main()
 {
-    auto now = time_utils::utils_now();
-    bool b1 = true;
-    for (int i = 0; i < 1000 * 10000; i++)
+
+    ConstexprString64 var("");
     {
-        constexpr auto a = DefaultString("hello world");
-        constexpr auto b = DefaultString(" are you ok?");
-        constexpr auto c = a + b;
-        // if (b1)
-        // {
-        //     std::cout << c.c_str() << std::endl;
-        //     b1 = false;
-        // }
+        constexpr static DefaultString f("hello world");
+        var = _zip<128, f>();
     }
-    std::cout << time_utils::utils_now() - now << std::endl;
+    std::cout << var.c_str() << std::endl;
+
+
+    // auto now = time_utils::utils_now();
+    // bool b1 = true;
+    // for (int i = 0; i < 1000 * 10000; i++)
+    // {
+    //     constexpr auto a = DefaultString("hello world");
+    //     constexpr auto b = DefaultString(" are you ok?");
+    //     constexpr auto c = a + b;
+    //     // if (b1)
+    //     // {
+    //     //     std::cout << c.c_str() << std::endl;
+    //     //     b1 = false;
+    //     // }
+    // }
+    // std::cout << time_utils::utils_now() - now << std::endl;
 
     return 0;
 }
