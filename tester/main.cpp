@@ -20,8 +20,6 @@ int main()
     c.push(3);
     c.pop();
     c.push(4);
-    c.pollBack();
-    c.pop();
     for (auto& elem : c)
     {
         std::cout << elem << std::endl;
