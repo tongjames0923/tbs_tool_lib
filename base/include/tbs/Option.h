@@ -85,7 +85,7 @@ public:
      *
      * @return 返回内部值。
      */
-    explicit operator T() const
+    operator T() const
     {
         return *m_val;
     }
@@ -152,7 +152,6 @@ public:
         return !isNull();
     }
 
-private:
     /**
      * @brief 默认构造函数，初始化为空。
      */
@@ -184,6 +183,9 @@ private:
     explicit Option(const std::nullptr_t&) : m_val(nullptr)
     {
     }
+
+
+private:
 
     /**
      * @brief OptionFactory 是 Option 的友元类。

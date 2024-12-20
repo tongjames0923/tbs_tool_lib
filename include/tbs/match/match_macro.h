@@ -12,7 +12,7 @@
  *
  * @param f 匹配逻辑的 lambda 表达式
  */
-#define ANY_MATCH(f) make_any_matcher([&](const auto& _target_, const auto& _v_) -> auto { f })
+#define ANY_MATCH(f) make_any_matcher([&](const auto& _target_, const decltype(val)& _v_) -> auto { f })
 
 /**
  * @brief 定义一个宏，用于创建一个可以匹配特定值的匹配器。
@@ -20,7 +20,7 @@
  * @param val 要匹配的目标值
  * @param f 匹配逻辑的 lambda 表达式
  */
-#define EQUAL_MATCH(val, f) make_equal_matcher(val, [&](const auto& _target_, const auto& _v_) -> auto { f })
+#define EQUAL_MATCH(val, f) make_equal_matcher(val, [&](const auto& _target_, const decltype(val) & _v_) -> auto { f })
 
 /**
  * @brief 定义一个宏，用于创建一个基于函数的匹配器。
@@ -28,7 +28,7 @@
  * @param e 函数表达式的返回值
  * @param f 匹配逻辑的 lambda 表达式
  */
-#define FUNCTION_MATCH(e, f) make_functional_matcher([&](const auto& _target_, const auto& _v_) -> auto { f }, [&]() { return e; })
+#define FUNCTION_MATCH(e, f) make_functional_matcher([&](const auto& _target_, const decltype(val)& _v_) -> auto { f }, [&]() { return e; })
 
 /**
  * @brief 定义一个宏，用于创建一个不返回值的匹配逻辑。
