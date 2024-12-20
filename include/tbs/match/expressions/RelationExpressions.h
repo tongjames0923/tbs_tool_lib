@@ -24,7 +24,7 @@ public:
    * @return true 如果两个参数相等，否则返回false
    */
   template<typename T, typename O>
-  bool test(T target, O other) CONST;
+  bool test(CONST T& target, CONST O& other) CONST;
 };
 
 
@@ -40,7 +40,7 @@ class NotEqualMatchExpression {
    * @return 如果目标值不等于另一个值，则返回true；否则返回false
    */
   template<typename T, typename O>
-  bool test(T target, O other) CONST;
+  bool test(CONST T& target, CONST O& other) CONST;
 };
 
 /**
@@ -55,7 +55,7 @@ class GreaterThanMatchExpression {
    * @return 如果目标值大于另一个值，则返回true；否则返回false
    */
   template<typename T, typename O>
-  bool test(T target, O other) CONST;
+  bool test(CONST T& target,CONST O& other) CONST;
 };
 
 /**
@@ -70,7 +70,7 @@ class GreaterThanOrEqualMatchExpression {
    * @return 如果目标值大于或等于另一个值，则返回true；否则返回false
    */
   template<typename T, typename O>
-  bool test(T target, O other) CONST;
+  bool test(CONST T& target, CONST O& other) CONST;
 };
 
 /**
@@ -85,7 +85,7 @@ class LessThanMatchExpression {
    * @return 如果目标值小于另一个值，则返回true；否则返回false
    */
   template<typename T, typename O>
-  bool test(T target, O other) CONST;
+  bool test(CONST T& target, CONST O& other) CONST;
 };
 
 /**
@@ -100,38 +100,38 @@ class LessThanOrEqualMatchExpression {
    * @return 如果目标值小于或等于另一个值，则返回true；否则返回false
    */
   template<typename T, typename O>
-  bool test(T target, O other) CONST;
+  bool test(CONST T& target, CONST O& other) CONST;
 };
 
 
 template<typename T, typename O>
-bool GreaterThanOrEqualMatchExpression::test(T target, O other) CONST {
+bool GreaterThanOrEqualMatchExpression::test(CONST T& target, CONST O& other) CONST {
   return target > other || target == other;
 }
 
 template<typename T, typename O>
-bool LessThanMatchExpression::test(T target, O other) CONST {
+bool LessThanMatchExpression::test(CONST T& target, CONST O& other) CONST {
   return target < other;
 }
 
 template<typename T, typename O>
-bool LessThanOrEqualMatchExpression::test(T target, O other) CONST {
+bool LessThanOrEqualMatchExpression::test(CONST T& target, CONST O& other) CONST {
   return target < other || target == other;
 }
 
 template<typename T, typename O>
-bool NotEqualMatchExpression::test(T target, O other) CONST {
+bool NotEqualMatchExpression::test(CONST T& target, CONST O& other) CONST {
   return target != other;
 }
 
 template<typename T, typename O>
-bool EqualMatchExpression::test(T target, O other) CONST {
+bool EqualMatchExpression::test(CONST T& target, CONST O& other) CONST {
   return target == other;
 }
 
 
 template<typename T, typename O>
-bool GreaterThanMatchExpression::test(T target, O other) CONST {
+bool GreaterThanMatchExpression::test(CONST T& target, CONST O& other) CONST {
   return target > other;
 }
 

@@ -25,7 +25,7 @@ public:
    * @return true 如果两个参数匹配，否则返回false
    */
   template<typename T, typename O>
-  bool test(T target, O other) CONST;
+  bool test(CONST T& target, CONST O& other) CONST;
 };
 
 
@@ -52,7 +52,7 @@ public:
    * @return true 如果两个参数根据_func定义的逻辑匹配，否则返回false
    */
   template<typename T, typename O>
-  bool test(T target, O other) CONST;
+  bool test(CONST T& target, CONST O& other) CONST;
 
   /**
    * @brief 构造函数
@@ -71,12 +71,12 @@ private:
 
 template<typename E>
 template<typename T, typename O>
-bool FunctionalMatchExpression<E>::test(T target, O other) CONST {
+bool FunctionalMatchExpression<E>::test(CONST T& target, CONST O& other) CONST {
   return _func();
 }
 
 template<typename T, typename O>
-bool AnyMatchExpression::test(T target, O other) CONST {
+bool AnyMatchExpression::test(CONST T& target, CONST O& other) CONST {
   return true;
 }
 
