@@ -85,7 +85,7 @@ public:
      *
      * @return 返回内部值。
      */
-    operator T() const
+    explicit operator T() const
     {
         return *m_val;
     }
@@ -105,7 +105,9 @@ public:
      *
      * @tparam U 另一个 Option 对象中值的类型。
      * @param other 要比较的另一个 Option 对象。
-     * @return 如果两个 Option 对象都不为空且内部值不相等，或者一个为空而另一个不为空，则返回 true；否则返回 false。
+     * @return 如果两个 Option
+     * 对象都不为空且内部值不相等，或者一个为空而另一个不为空，则返回
+     * true；否则返回 false。
      */
     template <typename U>
     bool operator!=(const Option<U>& other) const
@@ -122,7 +124,8 @@ public:
      *
      * @tparam U 另一个 Option 对象中值的类型。
      * @param other 要比较的另一个 Option 对象。
-     * @return 如果两个 Option 对象都为空，或者都不为空且内部值相等，则返回 true；否则返回 false。
+     * @return 如果两个 Option 对象都为空，或者都不为空且内部值相等，则返回
+     * true；否则返回 false。
      */
     template <typename U>
     bool operator==(const Option<U>& other) const
@@ -164,7 +167,7 @@ public:
      *
      * @param val 要存储的值。
      */
-    explicit Option(T&& val) : m_val(std::make_unique<T>(std::move(val)))
+    explicit Option(T&& val) : m_val(new T(std::move(val)))
     {
     }
 
@@ -173,20 +176,34 @@ public:
      *
      * @param val 要存储的值。
      */
-    explicit Option(const T& val) : m_val(std::make_unique<T>(val))
+    explicit Option(const T& val) : m_val(new T(val))
     {
     }
 
     /**
-     * @brief 构造函数，通过 nullptr 初始化为空。
+     * @brief 赋值运算符重载，通过右值引用赋值。
+     *
+     * @param val 要存储的值。
+     * @return 返回当前 Option 对象的引用。
      */
-    explicit Option(const std::nullptr_t&) : m_val(nullptr)
+    Option<T>& operator<<(T&& val)
     {
+        m_val.reset(new T(std::move(val)));
+        return *this;
     }
 
+    /**
+     * @brief 赋值运算符重载，通过左值引用赋值。
+     * @param val 要存储的值。
+     * @return 返回当前 Option 对象的引用。
+     */
+    Option<T>& operator<<(const T& val)
+    {
+        m_val.reset(new T(val));
+        return *this;
+    }
 
 private:
-
     /**
      * @brief OptionFactory 是 Option 的友元类。
      */
@@ -196,6 +213,39 @@ private:
      * @brief 存储实际值的智能指针。
      */
     std::unique_ptr<T> m_val;
+};
+
+template <typename T, size_t N>
+class Option<T[N]>
+{
+
+public:
+    explicit Option(T (&val)[N])
+    {
+        m_val = std::make_unique<T[N]>(N);
+        for (size_t i = 0; i < N; i++)
+        {
+            m_val[i] = val[i];
+        }
+    }
+
+    [[nodiscard]] bool isNull() const
+    {
+        return m_val == nullptr;
+    }
+
+    T*& operator*()
+    {
+        return *m_val;
+    }
+
+    const T*& operator*() const
+    {
+        return *m_val;
+    }
+
+private:
+    std::unique_ptr<T[N]> m_val;
 };
 
 /**
@@ -251,7 +301,7 @@ public:
      * @return 返回包含默认值的新 Option 对象。
      */
     template <typename U>
-    Option<U> operator|(U&& val) const
+    Option<U> operator<<(U&& val) const
     {
         return Option<U>(std::forward<U>(val));
     }
@@ -296,6 +346,12 @@ public:
     static Option<T> of(const T& val)
     {
         return Option<T>(val);
+    }
+
+    template <class T, size_t N>
+    static Option<T[N]> of(T (&val)[N])
+    {
+        return Option<T[N]>(val);
     }
 
     /**

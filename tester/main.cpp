@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+#include <string>
 #include <tbs/Option.h>
 #include <tbs/compile_time_function.h>
 #include <tbs/constexpr_value.h>
@@ -12,21 +13,15 @@
 #include <tbs/containers/iterator/Iteratable.h>
 #include <tbs/match/match_macro.h>
 #include <tbs/time_utils.hpp>
-
-Option<int> test()
+auto test()
 {
-    return SOME_OPTION(3);
+    int a[] = {1, 2, 3, 4};
+    return SOME_OPTION(a);
 }
 
 
 int main()
 {
-
-    auto k = match(test(), EQUAL_MATCH(SOME_OPTION(3), return SOME_OPTION(8);), []() { return SOME_OPTION(6); });
-    matchWithoutReturn(test(),
-                       EQUAL_MATCH(SOME_OPTION(3), std::cout << "3" << std::endl;),
-                       EQUAL_MATCH(SOME_OPTION(4), std::cout << "4" << std::endl;),
-                       []() { std::cout << "none" << std::endl; });
-    NO_RETURNED_MATCH(test(), EQUAL_MATCH(SOME_OPTION(3), std::cout << "3" << std::endl;), );
+    new const char[12]{"hello world"};
     return 0;
 }
