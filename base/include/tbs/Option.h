@@ -31,6 +31,8 @@ template <typename T>
 class Option
 {
 public:
+    using value_type = T;
+
     /**
      * @brief 检查 Option 是否为空。
      *
@@ -86,17 +88,18 @@ public:
      *
      * @return 返回内部值。
      */
-    explicit operator T() const
+    operator T() const
     {
         return *m_val;
     }
+
 
     /**
      * @brief 显式转换为布尔值。
      *
      * @return 如果 Option 不为空，则返回 true；否则返回 false。
      */
-    explicit operator bool() const
+    operator bool() const
     {
         return !isNull();
     }
@@ -273,74 +276,73 @@ public:
     }
 
 
-/**
- * @brief 从固定大小的数组创建一个包含 std::vector 的 Option 对象。
- *
- * @tparam U 数组元素的类型
- * @tparam N 数组的大小
- * @param val 固定大小的常量数组引用
- * @return Option<std::vector<U>> 包含 std::vector 的 Option 对象
- */
-template <class U, size_t N>
-static Option<std::vector<U>> of(const U (&val)[N])
-{
-    return Option<std::vector<U>>(std::vector<U>(val, val + N));
-}
+    /**
+     * @brief 从固定大小的数组创建一个包含 std::vector 的 Option 对象。
+     *
+     * @tparam U 数组元素的类型
+     * @tparam N 数组的大小
+     * @param val 固定大小的常量数组引用
+     * @return Option<std::vector<U>> 包含 std::vector 的 Option 对象
+     */
+    template <class U, size_t N>
+    static Option<std::vector<U>> of(const U (&val)[N])
+    {
+        return Option<std::vector<U>>(std::vector<U>(val, val + N));
+    }
 
-/**
- * @brief 从固定大小的数组创建一个包含 std::vector 的 Option 对象。
- *
- * @tparam U 数组元素的类型
- * @tparam N 数组的大小
- * @param val 固定大小的数组引用
- * @return Option<std::vector<U>> 包含 std::vector 的 Option 对象
- */
-template <class U, size_t N>
-static Option<std::vector<U>> of(U (&val)[N])
-{
-    return Option<std::vector<U>>(std::vector<U>(val, val + N));
-}
+    /**
+     * @brief 从固定大小的数组创建一个包含 std::vector 的 Option 对象。
+     *
+     * @tparam U 数组元素的类型
+     * @tparam N 数组的大小
+     * @param val 固定大小的数组引用
+     * @return Option<std::vector<U>> 包含 std::vector 的 Option 对象
+     */
+    template <class U, size_t N>
+    static Option<std::vector<U>> of(U (&val)[N])
+    {
+        return Option<std::vector<U>>(std::vector<U>(val, val + N));
+    }
 
-/**
- * @brief 从指针和大小创建一个包含 std::vector 的 Option 对象。
- *
- * @tparam U 指针指向的元素类型
- * @param val 指向元素的指针
- * @param size 元素的数量
- * @return Option<std::vector<U>> 包含 std::vector 的 Option 对象
- */
-template <class U>
-static Option<std::vector<U>> of(const U* val, size_t size)
-{
-    return Option<std::vector<U>>(std::vector<U>(val, val + size));
-}
+    /**
+     * @brief 从指针和大小创建一个包含 std::vector 的 Option 对象。
+     *
+     * @tparam U 指针指向的元素类型
+     * @param val 指向元素的指针
+     * @param size 元素的数量
+     * @return Option<std::vector<U>> 包含 std::vector 的 Option 对象
+     */
+    template <class U>
+    static Option<std::vector<U>> of(const U* val, size_t size)
+    {
+        return Option<std::vector<U>>(std::vector<U>(val, val + size));
+    }
 
-/**
- * @brief 从 std::vector 创建一个包含相同 std::vector 的 Option 对象（拷贝构造）。
- *
- * @tparam U vector 元素的类型
- * @param val 输入的 std::vector 引用
- * @return Option<std::vector<U>> 包含相同 std::vector 的 Option 对象
- */
-template <class U>
-static Option<std::vector<U>> of(const std::vector<U>& val)
-{
-    return Option<std::vector<U>>(val);
-}
+    /**
+     * @brief 从 std::vector 创建一个包含相同 std::vector 的 Option 对象（拷贝构造）。
+     *
+     * @tparam U vector 元素的类型
+     * @param val 输入的 std::vector 引用
+     * @return Option<std::vector<U>> 包含相同 std::vector 的 Option 对象
+     */
+    template <class U>
+    static Option<std::vector<U>> of(const std::vector<U>& val)
+    {
+        return Option<std::vector<U>>(val);
+    }
 
-/**
- * @brief 从 std::vector 创建一个包含相同 std::vector 的 Option 对象（移动构造）。
- *
- * @tparam U vector 元素的类型
- * @param val 输入的 std::vector 右值引用
- * @return Option<std::vector<U>> 包含相同 std::vector 的 Option 对象
- */
-template <class U>
-static Option<std::vector<U>> of(std::vector<U>&& val)
-{
-    return Option<std::vector<U>>(std::move(val));
-}
-
+    /**
+     * @brief 从 std::vector 创建一个包含相同 std::vector 的 Option 对象（移动构造）。
+     *
+     * @tparam U vector 元素的类型
+     * @param val 输入的 std::vector 右值引用
+     * @return Option<std::vector<U>> 包含相同 std::vector 的 Option 对象
+     */
+    template <class U>
+    static Option<std::vector<U>> of(std::vector<U>&& val)
+    {
+        return Option<std::vector<U>>(std::move(val));
+    }
 };
 
 /**

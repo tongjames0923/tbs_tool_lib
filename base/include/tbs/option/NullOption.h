@@ -53,6 +53,26 @@ public:
         return true;
     }
 
+
+    /**
+     * @brief 将 Option<void> 转换为 bool 类型。
+     *
+     * @return 总是返回 false，因为 Option<void> 始终为空。
+     */
+    operator bool() const
+    {
+        return false;
+    }
+
+    /**
+     * @brief 获取 Option<void> 的值。
+     *
+     * @return 总是返回 nullptr，因为 Option<void> 始终为空。
+     */
+    std::nullptr_t operator*() const
+    {
+        return nullptr;
+    }
     /**
      * @brief 提供一个默认值，当 Option 为空时使用。
      *
