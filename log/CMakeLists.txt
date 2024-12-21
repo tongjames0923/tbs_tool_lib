@@ -13,6 +13,7 @@ SET(INLS_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/include/inls)
 
 OPTION(CMAKE_LIB_BUILD_STATIC "库文件是否为静态，否为动态库" ON)
 
+find_package(fmt CONFIG REQUIRED)
 
 IF (WIN32)
     MESSAGE(STATUS "WINDOWS PLATFORM")
@@ -57,6 +58,7 @@ ELSE ()
 ENDIF ()
 target_include_directories(tbs_log PRIVATE ${HEADER_PATH} ${PROJECT_HEAD} ${INLS_SOURCE})
 add_dependencies(tbs_log tbs_tool_base)
+target_link_libraries(tbs_log PUBLIC fmt::fmt-header-only)
 # 安装库文件
 install(TARGETS tbs_log DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 

@@ -259,7 +259,7 @@ struct ConstexprValue<char, N>
      * @return 赋值后的对象
      */
     template <size_t N1>
-    constexpr ConstexprValue<char, N1> operator=(CONST ConstexprValue<char, N1>& other) CONST
+    constexpr ConstexprValue<char, N1>& operator=(CONST ConstexprValue<char, N1>& other) CONST
     {
         ConstexprValue<char, N1> result("");
         auto str = other.c_str();
@@ -369,15 +369,6 @@ struct ConstexprValue<char, N>
         return std::string_view(c_str(), length);
     }
 
-    /**
-     * @brief 转换为 std::string
-     *
-     * @return std::string
-     */
-    [[nodiscard]] constexpr std::string to_string() const
-    {
-        return std::string(c_str(), length);
-    }
 
     /**
      * @brief 与 std::string_view 比较

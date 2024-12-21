@@ -18,10 +18,10 @@ auto test()
     int a[] = {1, 2, 3, 4};
     return SOME_OPTION(a);
 }
-
+#include <tbs/log/log.hpp>
 
 int main()
 {
-    new const char[12]{"hello world"};
+    std::cout << LOG_FORMAT("hello world{}", 1) << std::endl;
     return 0;
 }

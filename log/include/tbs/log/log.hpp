@@ -4,7 +4,7 @@
 #ifndef TBS_CPP_LOG_HPP
 #define TBS_CPP_LOG_HPP
 
-#include <format>
+#include <fmt/core.h>
 #include <tbs/defs.h>
 #include <vector>
 
@@ -32,7 +32,7 @@ enum LogLevel
  *
  * 使用 std::format 进行日志信息的格式化。
  */
-#define LOG_FORMAT(...) std::format(__VA_ARGS__)
+#define LOG_FORMAT(...) fmt::format(__VA_ARGS__)
 
 /**
  * @brief 基础日志类
