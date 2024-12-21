@@ -6,8 +6,9 @@
 #define TBS_TOOL_LIB_OPTION_H
 
 #include <memory>
+#include <vector>
 #include "defs.h"
-
+#include "option/NullOption.h"
 /**
  * @class OptionFactory
  *
@@ -215,104 +216,6 @@ private:
     std::unique_ptr<T> m_val;
 };
 
-template <typename T, size_t N>
-class Option<T[N]>
-{
-
-public:
-    explicit Option(T (&val)[N])
-    {
-        m_val = std::make_unique<T[N]>(N);
-        for (size_t i = 0; i < N; i++)
-        {
-            m_val[i] = val[i];
-        }
-    }
-
-    [[nodiscard]] bool isNull() const
-    {
-        return m_val == nullptr;
-    }
-
-    T*& operator*()
-    {
-        return *m_val;
-    }
-
-    const T*& operator*() const
-    {
-        return *m_val;
-    }
-
-private:
-    std::unique_ptr<T[N]> m_val;
-};
-
-/**
- * @class Option<void>
- *
- * @brief 特化模板类，表示一个空的 Option。
- */
-template <>
-class Option<void>
-{
-public:
-    /**
-     * @brief 比较 Option<void> 和其他类型的 Option 是否不相等。
-     *
-     * @tparam U 另一个 Option 对象中值的类型。
-     * @param other 要比较的另一个 Option 对象。
-     * @return 如果另一个 Option 不为空，则返回 true；否则返回 false。
-     */
-    template <typename U>
-    bool operator!=(const Option<U>& other) const
-    {
-        return !other.isNull();
-    }
-
-    /**
-     * @brief 比较 Option<void> 和其他类型的 Option 是否相等。
-     *
-     * @tparam U 另一个 Option 对象中值的类型。
-     * @param other 要比较的另一个 Option 对象。
-     * @return 如果另一个 Option 为空，则返回 true；否则返回 false。
-     */
-    template <typename U>
-    bool operator==(const Option<U>& other) const
-    {
-        return other.isNull();
-    }
-
-    /**
-     * @brief 检查 Option 是否为空。
-     *
-     * @return 总是返回 true，因为 Option<void> 始终为空。
-     */
-    [[nodiscard]] bool isNull() const
-    {
-        return true;
-    }
-
-    /**
-     * @brief 提供一个默认值，当 Option 为空时使用。
-     *
-     * @tparam U 提供的默认值类型。
-     * @param val 默认值。
-     * @return 返回包含默认值的新 Option 对象。
-     */
-    template <typename U>
-    Option<U> operator<<(U&& val) const
-    {
-        return Option<U>(std::forward<U>(val));
-    }
-};
-
-/**
- * @typedef NoneOption
- *
- * @brief 定义 Option<void> 的别名。
- */
-using NoneOption = Option<void>;
 
 /**
  * @class OptionFactory
@@ -348,12 +251,6 @@ public:
         return Option<T>(val);
     }
 
-    template <class T, size_t N>
-    static Option<T[N]> of(T (&val)[N])
-    {
-        return Option<T[N]>(val);
-    }
-
     /**
      * @brief 创建一个新的空 Option 对象。
      *
@@ -363,6 +260,87 @@ public:
     {
         return {};
     }
+
+    /**
+     * @brief 创建一个新的 Option 对象，通过字符串初始化。
+     *
+     * @param val 要存储的字符串。
+     * @return 返回新的 Option 对象。
+     */
+    static Option<std::string> of(const char* val)
+    {
+        return Option<std::string>(std::string(val));
+    }
+
+
+/**
+ * @brief 从固定大小的数组创建一个包含 std::vector 的 Option 对象。
+ *
+ * @tparam U 数组元素的类型
+ * @tparam N 数组的大小
+ * @param val 固定大小的常量数组引用
+ * @return Option<std::vector<U>> 包含 std::vector 的 Option 对象
+ */
+template <class U, size_t N>
+static Option<std::vector<U>> of(const U (&val)[N])
+{
+    return Option<std::vector<U>>(std::vector<U>(val, val + N));
+}
+
+/**
+ * @brief 从固定大小的数组创建一个包含 std::vector 的 Option 对象。
+ *
+ * @tparam U 数组元素的类型
+ * @tparam N 数组的大小
+ * @param val 固定大小的数组引用
+ * @return Option<std::vector<U>> 包含 std::vector 的 Option 对象
+ */
+template <class U, size_t N>
+static Option<std::vector<U>> of(U (&val)[N])
+{
+    return Option<std::vector<U>>(std::vector<U>(val, val + N));
+}
+
+/**
+ * @brief 从指针和大小创建一个包含 std::vector 的 Option 对象。
+ *
+ * @tparam U 指针指向的元素类型
+ * @param val 指向元素的指针
+ * @param size 元素的数量
+ * @return Option<std::vector<U>> 包含 std::vector 的 Option 对象
+ */
+template <class U>
+static Option<std::vector<U>> of(const U* val, size_t size)
+{
+    return Option<std::vector<U>>(std::vector<U>(val, val + size));
+}
+
+/**
+ * @brief 从 std::vector 创建一个包含相同 std::vector 的 Option 对象（拷贝构造）。
+ *
+ * @tparam U vector 元素的类型
+ * @param val 输入的 std::vector 引用
+ * @return Option<std::vector<U>> 包含相同 std::vector 的 Option 对象
+ */
+template <class U>
+static Option<std::vector<U>> of(const std::vector<U>& val)
+{
+    return Option<std::vector<U>>(val);
+}
+
+/**
+ * @brief 从 std::vector 创建一个包含相同 std::vector 的 Option 对象（移动构造）。
+ *
+ * @tparam U vector 元素的类型
+ * @param val 输入的 std::vector 右值引用
+ * @return Option<std::vector<U>> 包含相同 std::vector 的 Option 对象
+ */
+template <class U>
+static Option<std::vector<U>> of(std::vector<U>&& val)
+{
+    return Option<std::vector<U>>(std::move(val));
+}
+
 };
 
 /**
